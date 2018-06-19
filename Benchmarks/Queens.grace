@@ -22,12 +22,12 @@
 //   2018, June
 //
 
-var freeMaxs
-var freeRows
-var freeMins
-var queenRows 
+var freeMaxs: List
+var freeRows: List
+var freeMins: List
+var queenRows: List
 
-method queens {
+method queens -> Boolean {
   freeRows  := platform.kernel.Array.new( 8.asInteger)withAll(true)
   freeMaxs  := platform.kernel.Array.new(16.asInteger)withAll(true)
   freeMins  := platform.kernel.Array.new(16.asInteger)withAll(true)
@@ -35,7 +35,7 @@ method queens {
   placeQueen(1.asInteger)
 }
 
-method placeQueen (c) {
+method placeQueen (c: Number) -> Boolean {
   1.asInteger.to(8.asInteger) do { r ->
     row (r) column (c) .ifTrue {
       queenRows.at (r) put (c)
@@ -50,24 +50,27 @@ method placeQueen (c) {
   false
 }
 
-method row (r) column (c) {
+method row (r: Number) column (c: Number) -> Boolean {
   freeRows.at(r) && freeMaxs.at(c + r) && freeMins.at(c - r + 8.asInteger)
 }
 
-method row (r) column (c) put (v) {
+method row (r: Number) column (c: Number) put (v: Boolean) -> Done {
   freeRows.at( r                   ) put (v)
   freeMaxs.at( c + r               ) put (v)
   freeMins.at( c - r + 8.asInteger ) put (v)
+  Done
 }
 
 method asString { "Queens.grace" }
 
-method benchmark(innerIterations) {
-  1.asInteger.to(innerIterations) do { i ->
-    var result := true
+method benchmark(innerIterations: Number) {
+  var result: Boolean := true
+
+  1.asInteger.to(innerIterations) do { i ->  
     1.asInteger.to(10.asInteger) do { j ->
       result := result.and(queens)
     }
+
     result.ifFalse {
       error("{self} failed, {result} != true")
     }

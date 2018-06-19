@@ -23,34 +23,40 @@
 //   2018, June
 //
 
-method Sieve {
-  var flags := platform.kernel.Array.new(5000.asInteger)
-  var size := 5000
-  
-  var primeCount := 0
+
+method run {
+
+  var flags: List := platform.kernel.Array.new(5000.asInteger)
+  var size: Number := 5000
+  var primeCount: Number := 0
+
   flags.putAll(true)
 
-  2.asInteger.to(size.asInteger)do { i ->
+  2.asInteger.to(size.asInteger) do { i ->
+
     if (flags.at(i - 1.asInteger)) then {
-      primeCount := primeCount + 1
-      var k := i + i
+      primeCount := primeCount + 1.asInteger
+
+      var k: Number := i + i
       { k <= size.asInteger }.whileTrue {
         flags.at (k - 1.asInteger) put (false)
         k := k + i
       }
+
     }
   }
   
   primeCount
 }
 
-method asString {"Sieve.grace"}
+method asString -> String {
+  "Sieve.grace"
+}
 
-method benchmark(innerIterations) {
+method benchmark(innerIterations: Number) {
   1.asInteger.to(innerIterations) do { i ->
-    def result = Sieve
+    var result: Number := run
     if (result != 669) then {
-      erorr
       error("{self} failed, {result} != 669")
     }
   }

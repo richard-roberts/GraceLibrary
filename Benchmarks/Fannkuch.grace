@@ -22,47 +22,60 @@
 //   2018, June
 //
 
-class Fannkuch {
-  def size = 7.asInteger
-  var perm := 1.asInteger.to(size)
-  var timesRotated := platform.kernel.Array.new(size)withAll(0.asInteger)
-  var atEnd := false
+type FannkuchBenchmark = interface {
+  size
+  perm
+  timesRotated
+  atEnd
+  pfannkuchen(anArray)
+  makeNext
+  maxPfannkuchen
+  next
+}
 
-  method pfannkuchen (anArray) {
-    var first
-    var k := 0.asInteger
+class FannkuchBenchmark {
+  def size: Number = 7.asInteger
+  var perm: List := 1.asInteger.to(size)
+  var timesRotated: List := platform.kernel.Array.new(size)withAll(0.asInteger)
+  var atEnd: Boolean := false
 
-    { (first := anArray.at(1.asInteger)) == 1.asInteger }.whileFalse {
+  method pfannkuchen (anArray: List) -> Number {
+    var k: Number := 0.asInteger
+    var complement: Number
+    var first: Number := anArray.at(1.asInteger)
+
+    { first == 1.asInteger }.whileFalse {
       
       k := k + 1.asInteger
-      var complement := first + 1.asInteger
+      complement := first + 1.asInteger
 
       1.asInteger.to(first / 2.asInteger) do { i ->
-        var a := anArray.at(i)
-        var b := anArray.at(complement - i)
+        var a: Number := anArray.at(i)
+        var b: Number := anArray.at(complement - i)
         anArray.at (i) put (b)
-        anArray.at(complement - i) put (a)
-      }
+        anArray.at (complement - i) put (a)
 
+        first := anArray.at(1.asInteger)
+      }
     }
 
     k
   }
 
-  method makeNext {
+  method makeNext -> Done {
     
     // Generate the next permutation.
     2.asInteger.to (perm.size) do { r ->
       
       // Rotate the first r items to the left.
-      var temp := perm.at (1.asInteger)
+      var temp: Number := perm.at (1.asInteger)
       1.asInteger.to(r - 1.asInteger) do { i ->
         perm.at(i) put (perm.at(i + 1.asInteger))
       }
       perm.at (r) put (temp)
 
       timesRotated.at (r) put ((timesRotated.at(r) + 1.asInteger) % r)
-      var remainder := timesRotated.at (r)
+      var remainder: Number := timesRotated.at (r)
       (remainder == 0.asInteger).ifFalse {
         return self
       }
@@ -73,28 +86,32 @@ class Fannkuch {
 
     // We are past the final permutation.
     atEnd := true
+    Done
   }
 
-  method maxPfannkuchen {
-    var max := 0.asInteger
+  method maxPfannkuchen -> Number {
+    var max: Number := 0.asInteger
     { atEnd }.whileFalse {
       max := max.max (pfannkuchen (next))
     }
     max
   }
 
-  method next {
+  method next -> List {
     var result := perm.copy
     makeNext
     result
   }
 }
 
-method asString {"Fannkuch.grace"}
+method asString -> String {
+  "Fannkuch.grace"
+}
 
-method benchmark(innerIterations) {
+method benchmark(innerIterations: Number) {
   1.asInteger.to(innerIterations) do { i ->
-    var result := Fannkuch.maxPfannkuchen
+    var instance: FannkuchBenchmark := FannkuchBenchmark
+    var result: Number := instance.maxPfannkuchen
     (result == 16).ifFalse {
       error("{self} failed, {result} != 16")
     }

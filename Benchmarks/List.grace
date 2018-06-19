@@ -23,11 +23,17 @@
 //   2018, June
 //
 
-class ListElement(n) {
-  var val := n
-  var next
+type ListElement = interface {
+  val
+  next
+  length
+}
+
+class ListElement(n: Number) -> ListElement {
+  var val: Number := n
+  var next: ListElement
   
-  method length {
+  method length -> Number {
     (next.isNil).ifTrue {
       return 1.asInteger
     } ifFalse {
@@ -36,21 +42,27 @@ class ListElement(n) {
   } 
 }
 
-class List {
+type ListBenchmark = interface {
+  makeList(length)
+  isShorter(x)than(y)
+  talkWithX(x)withY(y)withZ(z)
+}
+
+class ListBenchmark -> ListBenchmark {
   
-  method makeList(length) {
+  method makeList(length: Number) -> ListElement {
     (length == 0).ifTrue {
       return Done
     } ifFalse {
-      var e := ListElement(length)
+      var e: ListElement := ListElement(length)
       e.next(makeList(length - 1.asInteger))
       return e
     }
   }
 
-  method isShorter (x) than (y) {
-    var xTail := x
-    var yTail := y
+  method isShorter (x: ListElement) than (y: ListElement) -> Boolean {
+    var xTail: ListElement := x
+    var yTail: ListElement := y
 
     { yTail.isNil }.whileFalse {
         (xTail.isNil) .ifTrue {
@@ -62,7 +74,7 @@ class List {
     false
   }
 
-  method talkWithX (x) withY (y) withZ (z) {
+  method talkWithX (x: ListElement) withY (y: ListElement) withZ (z: ListElement) -> ListElement {
     (isShorter (y) than (x)).ifTrue {
       return talkWithX (talkWithX (x.next) withY (y) withZ (z) )
                  withY (talkWithX (y.next) withY (z) withZ (x) )
@@ -71,23 +83,21 @@ class List {
       return z
     }
   }
-
-  
 }
 
-method asString {
-  "ListUntyped.grace"
+method asString -> String {
+  "List.grace"
 }
 
-method benchmark(innerIterations) {
-  var instance := List
+method benchmark(innerIterations: Number) {
+  var instance: ListBenchmark := ListBenchmark
 
   1.asInteger.to(innerIterations) do { i ->
-    var result := instance.talkWithX (instance.makeList(15)) withY (instance.makeList(10)) withZ (instance.makeList(6)).length
+    var result: Number := instance.talkWithX (instance.makeList(15)) 
+                                       withY (instance.makeList(10)) 
+                                       withZ (instance.makeList( 6)).length
     if (result != 10) then {
       error("{self} failed, {result} != 10")
     }
   }
-
-  Done
 }
