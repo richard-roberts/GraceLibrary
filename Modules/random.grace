@@ -15,7 +15,7 @@ method next {
 }
 
 method random {
-  next / 65535
+  (next + 0) / 65535.0
 }
 
 method randomBetween(x)and(y) {
