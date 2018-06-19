@@ -4,6 +4,7 @@ import "mirrors" as mirrors
 var module
 var suite
 var innerIterations
+var warumpIterations
 var outerIterations
 
 method getSuiteByName(name) {
@@ -18,7 +19,7 @@ method doIterations {
 method runBenchmark {
   print("Start {suite} benchmark ... ")
 
-  def times = platform.kernel.Array.new(outerIterations)
+  def times = platform.kernel.Vector.new
   var start
   var end
   var time
@@ -27,7 +28,10 @@ method runBenchmark {
     doIterations
     end := platform.system.ticks 
     time := end - start
-    times.at(i)put(time)
+
+    (i > warumpIterations).ifTrue {
+      times.append(time)  
+    }
 
     print("{suite}: iterations={1.asInteger} runtime: {time}us")
   }
@@ -49,10 +53,11 @@ method runBenchmarks(suite) {
   }
 }
 
-method invoke (moduleName) with (nOuter, nInner) {
+method invoke (moduleName) with (nOuter, nWarmup, nInner) {
     module := moduleName
     suite := getSuiteByName(module)
     outerIterations := nOuter
+    warumpIterations := nWarmup
     innerIterations := nInner
     runBenchmark
 }
@@ -73,7 +78,7 @@ method exe(args) {
 
   // Run the given benchmark
   if (args.size == 5) then {
-    invoke (args.at(2.asInteger)) with (args.at(3.asInteger).asInteger, args.at(5.asInteger).asInteger)
+    invoke (args.at(2.asInteger)) with (args.at(3.asInteger).asInteger, args.at(4.asInteger).asInteger, args.at(5.asInteger).asInteger)
     return 0
   }
 
