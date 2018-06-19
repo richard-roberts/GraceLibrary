@@ -1,278 +1,253 @@
 import "random" as random
 
-def boardWidth = 100.asInteger
-def boardHeight = 100.asInteger
-def seed = 24453.asInteger
-def minFruitAtStart = 5
-def maxFruitAtStart = 10
-def appleSpawnWhenRandimGreaterThan = 950
+var BOARDHEIGHT := 20.asInteger
+var BOARDWIDTH := 30.asInteger
 
-def render = false
+method resetRandom -> Done {
+  random.setSeed(1324.asInteger)
+  Done
+}
 
-type Coordinate = interface {
+
+type Position = interface {
   x
   y
 }
 
-class Coordinate(x: Number, y: Number) {
-  method asString {
-    "{x}, {y}"
+class Position(x: Number, y: Number) -> Position {
+  method asString -> String {
+    return "({x}, {y})"
   }
 }
 
-method randomCoordinateOnBoard {
-  def x = random.randomBetween(1.asInteger)and(boardWidth - 1.asInteger)
-  def y = random.randomBetween(1.asInteger)and(boardHeight - 1.asInteger)
-  Coordinate(x, y)
+method randomPosition -> Position {
+   Position ( random.randomBetween(1.asInteger)and(BOARDWIDTH - 1.asInteger),
+              random.randomBetween(1.asInteger)and(BOARDHEIGHT - 1.asInteger) )
 }
 
-type Segment = interface {
-  coordinate
+method samePosition(a: Position, b: Position) -> Boolean {
+  (a.x == b.x) && (a.y == b.y)
 }
 
-class Segment(coordinate: Coordinate) {
-  method asString {
-    "Segment[{coordinate.asString}]"
-  }
+type Snake = {
+  segments
+  direction
+  head
+  collidedWithWall
+  collidedWithSelf
+  nextHead
+  slither
+  grow
+  asString
 }
 
-type Snake = interface {
-  segment(ix)
-  nSegments
-}
+class Snake(segments: List)  {
+  var direction: String
 
-class Snake {
-  def segments = platform.kernel.Vector.new
-  segments.append(Segment(randomCoordinateOnBoard))
-
-  method reversedIndex(ix:Number) {
-    segments.size - ix + 1.asInteger
+  method head -> Position {
+    return segments.at(segments.size)
   }
 
-  method segment(ix: Number) {
-    segments.at(reversedIndex(ix))
+  method collidedWithWall -> Boolean {
+    (head.x <= 0) || (head.x >= BOARDWIDTH) || (head.y <= 0) || (head.y >= BOARDHEIGHT)
   }
 
-  method replaceSegmentAt(ix: Number) with (segment: Segment) {
-    segments.at(reversedIndex(ix)) put(segment)
-  }
-
-  method nSegments {
-    segments.size
-  }
-
-  method tail {
-    segments.at(1.asInteger)
-  }
-
-  method isTouching(coordinate: Coordinate) {
-    1.asInteger.to(segments.size) do { ix ->
-      var item := segments.at(ix)
-      ((item.coordinate.x == coordinate.x) && (item.coordinate.y == coordinate.y)).ifTrue {
-        return true
+  method collidedWithSelf -> Boolean {
+    1.asInteger.to(segments.size) do { i: Number ->
+      (i + 1.asInteger).to(segments.size) do { j: Number ->
+        (samePosition(segments.at(i), segments.at(j))).ifTrue {
+          return true
+        }
       }
     }
-
-    false
-  }
-
-  method shiftSegments {
-    1.asInteger.to(segments.size - 1.asInteger) do { ix ->
-      var seg := segment(ix)
-      replaceSegmentAt(ix + 1.asInteger) with(seg)
-    }
-  }
-
-  method grow(ox, oy) {
-    var c := segment(1.asInteger).coordinate
-    var x := c.x + ox
-    var y := c.y + oy
-    segments.append(Segment(Coordinate(x, y)))
-  }
-
-  method growLeft  { grow ((0 - 1).asInteger,       0.asInteger) }
-  method growRight { grow (      1.asInteger,       0.asInteger) }
-  method growUp    { grow (      0.asInteger, (0 - 1).asInteger) }
-  method growDown  { grow (      0.asInteger,       1.asInteger) }
-
-  method moveLeft {
-    growLeft
-    segments.remove(tail)
-  }
-
-  method moveRight {
-    growRight
-    segments.remove(tail)
-  }
-
-  method moveUp {
-    growUp
-    segments.remove(tail)
-  }
-
-  method moveDown {
-    growDown
-    segments.remove(tail)
-  }
-
-  method asString {
-    var ret := ""
-    1.asInteger.to(segments.size) do { ix ->
-      var seg := segment(ix)
-      ret := ret + "{ix}: {seg}\n"
-    }
-    ret
-  }
-
-}
-
-type Apple = interface {
-  coordinate
-}
-
-class Apple(coordinate: Coordinate) {}
-
-class Game {
-
-  // Setup
-  def snake = Snake
-  def food = platform.kernel.Vector.new
-  1.asInteger.to(random.randomBetween(minFruitAtStart)and(maxFruitAtStart)) do { i ->
-    food.append(Apple(randomCoordinateOnBoard))
-  }  
-
-  method isThereFoodAt(coordinate: Coordinate) {
-    1.asInteger.to(food.size) do { i ->
-      var item := food.at(i)
-      ((item.coordinate.x == coordinate.x) && (item.coordinate.y == coordinate.y)).ifTrue {
-        return true
-      }
-    }
-
-    false
-  }
-
-  // Collided with foo when the head is at any of the existing foods.
-  method hasCollidedWithFood(snake : Snake) {
-    var head := snake.segment(1.asInteger)
-    1.asInteger.to(food.size) do { i ->
-      var item := food.at(i)
-      ((head.coordinate.x == item.coordinate.x) && (head.coordinate.y == item.coordinate.y)).ifTrue {
-        food.remove(item)
-        return true
-      }
-    }
-
-    false
-  }
-
-  // Collided with wall when the head is at or somehow outside the rectangular
-  // region defined between (0, 0) and (boardWidth, boardHeight).
-  method hasCollidedWithWall(snake : Snake) {
-    var head := snake.segment(1.asInteger)
-    return (head.coordinate.x <= 0) || (head.coordinate.y <= 0) || (head.coordinate.x >= boardWidth) || (head.coordinate.y >= boardHeight)
-  }
-
-  // Collided with self when the head occurs at the same position
-  // as any of its body segments
-  method hasCollidedWithSelf(snake: Snake) {
-    var head := snake.segment(1.asInteger)
-    var bodySegment
-    2.asInteger.to(snake.nSegments) do { i ->
-      bodySegment := snake.segment(i)
-
-      ((head.coordinate.x == bodySegment.coordinate.x) && (head.coordinate.y == bodySegment.coordinate.y)).ifTrue {
-        return true
-      }
-    }
-
     return false
   }
 
-  // Game is over when the snake eats collides with either a wall or itself
-  method isGameOver(snake: Snake) {
-    return hasCollidedWithSelf(snake) || hasCollidedWithWall(snake)
+  method nextHead -> Position {
+    ("right" == direction). ifTrue { return Position(head.x + 1.asInteger, head.y              ) }
+    ("left"  == direction). ifTrue { return Position(head.x - 1.asInteger, head.y              ) }
+    ("down"  == direction). ifTrue { return Position(head.x,               head.y - 1.asInteger) }
+    ("up"    == direction). ifTrue { return Position(head.x,               head.y + 1.asInteger) }
+    error("{direction} not understood as a direction?")
   }
 
-  // Given a direction for the snake to move, update the game one step.
-  method update(move: String) {
-    // (random.randomBetween(1)and(1000) > appleSpawnWhenRandimGreaterThan).ifTrue {
-    //   food.append(Apple(randomCoordinateOnBoard))
-    // }
+  method slither -> Done {
+    segments.append(nextHead)
+    segments.remove(segments.at(1.asInteger))
+    Done
+  }
 
-    def collided = hasCollidedWithFood(snake)
-    collided.ifTrue {
-      (move == "left").ifTrue  { snake.growLeft }
-      (move == "right").ifTrue { snake.growRight }
-      (move == "up").ifTrue    { snake.growUp }
-      (move == "down").ifTrue  { snake.growDown }
+  method grow -> Done {
+    segments.append(nextHead)
+    Done
+  }
+
+  method isTouching(position: Position) -> Boolean {
+    segments.do { seg ->
+      samePosition(seg, position).ifTrue { return true }
+    }
+    return false
+  }
+
+  method asString -> String {
+    var s := "Snake\n  segs={segments.size}\n"
+    segments.do { seg ->
+      s := "{s}  {seg}\n"
+    }
+    return s
+  }
+}
+
+type World = interface {
+  food
+  snake
+  isGameOver
+  tick
+}
+
+class World {
+
+  var snake: Snake
+  var food: Position
+  var moves: Number := 0.asInteger
+
+  method reset {
+    var segments: List := platform.kernel.Vector.new
+    segments.append(Position(10.asInteger, 15.asInteger))
+    snake := Snake(segments)
+    snake.direction := "right"
+    food := randomPosition
+    moves := 0.asInteger
+  }
+
+  method isGameOver -> Boolean {
+    snake.collidedWithWall || snake.collidedWithSelf
+  }  
+
+  method tick {
+    samePosition(food, snake.head).ifTrue {
+      snake.grow
+      food := randomPosition
     } ifFalse {
-      (move == "left").ifTrue  { snake.moveLeft }
-      (move == "right").ifTrue { snake.moveRight }
-      (move == "up").ifTrue    { snake.moveUp }
-      (move == "down").ifTrue  { snake.moveDown }
+      snake.slither
     }
-    
+
+    moves := moves + 1.asInteger
   }
 
-  method draw {
-    var board_str := ""
-    0.asInteger.to(boardWidth) do { x ->
-      var row_str := ""
-      0.asInteger.to(boardHeight) do { y ->
-        var c := Coordinate(x, y)
-        var isWall := (x == 0) || (x == boardWidth) || (y == 0) || (y == boardHeight)
-        var isFood := isThereFoodAt(c)
-        var isSnake := snake.isTouching(c)
+  method handleKey (key: String) -> Done {
+    (key == "w"). ifTrue { 
+      snake.direction := "up"
+      return Done
+    }
+    (key == "s"). ifTrue { 
+      snake.direction := "down"
+      return Done
+    }
+    (key == "a"). ifTrue { 
+      snake.direction := "left"
+      return Done
+    }
+    (key == "d"). ifTrue {
+      snake.direction := "right"
+      return Done
+    }
 
-        var ascii := " "
-        
-        isSnake.ifTrue {
-          ascii := "S"
-        } ifFalse {
-          isFood.ifTrue {
-            ascii := "O"
-          } ifFalse {
-            isWall.ifTrue {
-              ascii := "X"
+    error("{key} not understood as a key?")
+  }
+
+  method render {
+    var renderStr := ""
+
+    0.asInteger.to(BOARDHEIGHT) do { y ->
+      var rowStr := ""
+
+      0.asInteger.to(BOARDWIDTH) do { x ->
+        var p := Position(x, y)
+
+        var isWall := (x <= 0) || (x >= BOARDWIDTH) || (y <= 0) || (y >= BOARDHEIGHT)
+        var isSnake := snake.isTouching(p)
+        var isFood := samePosition(food, p)
+
+        isSnake.ifTrue { rowStr := rowStr ++ "S" } ifFalse {
+          isFood.ifTrue { rowStr := rowStr ++ "O" } ifFalse {
+            isWall.ifTrue { rowStr := rowStr ++ "X" } ifFalse {
+              rowStr := rowStr ++ " "
             }
-          } 
+          }
         }
-        
-        row_str := row_str + ascii
       }
-      board_str := board_str + row_str + "\n"
-    }
-    print(board_str)
-  }
 
-  method run(moves) {
-    1.asInteger.to(moves.size) do { ix ->
-      var move := moves.at(ix)
-      update(move)
-      
-      render.ifTrue {
-        draw()
-      }
-      
-      (render && isGameOver(snake)).ifTrue {
-        print("Game Over after {ix} moves.")
-        return 0
-      }
+      renderStr := "{rowStr}\n" + renderStr
     }
+
+    print(renderStr)
   }
 
 }
 
-method benchmark {
-  var moves := platform.kernel.Vector.new
-  1.asInteger.to(100.asInteger) do { i ->
-    var r := random.randomBetween(0.asInteger)and(4.asInteger)
-    (r == 1.asInteger).ifTrue { moves.append("left") }
-    (r == 2.asInteger).ifTrue { moves.append("right") }
-    (r == 3.asInteger).ifTrue { moves.append("up") }
-    (r == 4.asInteger).ifTrue { moves.append("down") }
-    
+method replay (world: World, history: List) -> Done {
+  resetRandom
+  world.reset
+
+  history.do { item ->
+
+    (item == "t").ifTrue {
+      world.tick
+      // world.render
+      world.isGameOver.ifTrue {
+        return Done
+      }
+    } ifFalse {
+      world.handleKey(item)
+    }
   }
-  Game.run(moves)
+
+  Done
+}
+
+method asString -> String {
+  "Snake.grace"
+}
+
+method benchmark(innerIterations: Number) -> Done {
+  def world: World = World
+  def history = [
+    "t", "t", "t", "t", "t", "t", "t", "t", "t", "t",
+    "s", "t", "t", "t", "d", "t", "t", "t",
+    "w", "t", "t", "t", "t", "t", "t",
+    "a", "t", "t", "t", "t", "t", "t", "t",
+    "s", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t",
+    "a", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t",
+    "w", "t", "t", "t", "t",
+    "d", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t",
+    "w", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t",
+    "a", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t",
+    "s", "t", "t", "t",
+    "d", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t",
+    "w", "t", "t", "t", "t", "t", "t",
+    "a", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t",
+    "s", "t", "t", "t", "t", "t", "t", "t", "t", "t", "t",
+    "a", "t", "t",
+    "w", "t", "t",
+    "d", "t", "t", "t", "t", "t", "t"
+  ]
+  
+  1.asInteger.to(innerIterations) do { i ->
+    replay(world, history)
+
+    (world.moves != 157.asInteger).ifTrue {
+      error("{self} failed, {result} != true")
+    }
+    
+    (world.snake.segments.size != 10.asInteger).ifTrue {
+      error("{self} failed, {result} != true")
+    }
+
+    (world.isGameOver).ifFalse {
+      error("{self} failed, game is not over")
+    }
+  }
+
+  Done
 }
