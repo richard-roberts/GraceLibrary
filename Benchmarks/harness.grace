@@ -66,13 +66,13 @@ method invoke (moduleName) with (nOuter, nWarmup, nInner) {
 method exe(args) {
   // Run each benchmark once
   if (args.size == 1) then {
-    invoke ( "GraceLibrary/Benchmarks/Bounce.grace"   ) with ( 1.asInteger, 1.asInteger )
-    invoke ( "GraceLibrary/Benchmarks/Fannkuch.grace" ) with ( 1.asInteger, 1.asInteger )
-    invoke ( "GraceLibrary/Benchmarks/List.grace"     ) with ( 1.asInteger, 1.asInteger )
-    invoke ( "GraceLibrary/Benchmarks/Permute.grace"  ) with ( 1.asInteger, 1.asInteger )
-    invoke ( "GraceLibrary/Benchmarks/Queens.grace"   ) with ( 1.asInteger, 1.asInteger )
-    invoke ( "GraceLibrary/Benchmarks/Sieve.grace"    ) with ( 1.asInteger, 1.asInteger )
-    invoke ( "GraceLibrary/Benchmarks/Towers.grace"   ) with ( 1.asInteger, 1.asInteger )
+    invoke ( "GraceLibrary/Benchmarks/Bounce.grace"   ) with ( 100.asInteger, 30.asInteger, 1000.asInteger )
+    invoke ( "GraceLibrary/Benchmarks/Fannkuch.grace" ) with ( 100.asInteger, 30.asInteger,    9.asInteger )
+    invoke ( "GraceLibrary/Benchmarks/List.grace"     ) with ( 100.asInteger, 30.asInteger, 1000.asInteger )
+    invoke ( "GraceLibrary/Benchmarks/Permute.grace"  ) with ( 100.asInteger, 30.asInteger,  500.asInteger )
+    invoke ( "GraceLibrary/Benchmarks/Queens.grace"   ) with ( 100.asInteger, 30.asInteger,  400.asInteger )
+    invoke ( "GraceLibrary/Benchmarks/Sieve.grace"    ) with ( 100.asInteger, 30.asInteger,  400.asInteger )
+    invoke ( "GraceLibrary/Benchmarks/Towers.grace"   ) with ( 100.asInteger, 30.asInteger,  300.asInteger )
     return 0
   }
 
