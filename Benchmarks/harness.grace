@@ -23,10 +23,10 @@ method runBenchmark {
   var start
   var end
   var time
-  1.asInteger.to(outerIterations) do { i -> 
-    start := platform.system.ticks 
+  1.asInteger.to(outerIterations) do { i ->
+    start := platform.system.ticks
     doIterations
-    end := platform.system.ticks 
+    end := platform.system.ticks
     time := end - start
 
     (i > warumpIterations).ifTrue {
@@ -36,7 +36,7 @@ method runBenchmark {
     print("{suite}: iterations={1.asInteger} runtime: {time}us")
   }
 
-  // Print out human-readable information 
+  // Print out human-readable information
   var total := 0.asInteger
   times.do { time -> total := total + time }
   var average := (total / times.size)
@@ -65,7 +65,7 @@ method invoke (moduleName) with (nOuter, nWarmup, nInner) {
 
 method exe(args) {
   // Run each benchmark once
-  if (args.size == 1) then {
+  (args.size == 1).ifTrue {
     invoke ( "GraceLibrary/Benchmarks/Bounce.grace"   ) with ( 100.asInteger, 30.asInteger, 1000.asInteger )
     invoke ( "GraceLibrary/Benchmarks/Fannkuch.grace" ) with ( 100.asInteger, 30.asInteger,    9.asInteger )
     invoke ( "GraceLibrary/Benchmarks/List.grace"     ) with ( 100.asInteger, 30.asInteger, 1000.asInteger )
@@ -77,7 +77,7 @@ method exe(args) {
   }
 
   // Run the given benchmark
-  if (args.size == 5) then {
+  (args.size == 5).ifTrue {
     invoke (args.at(2.asInteger)) with (args.at(3.asInteger).asInteger, args.at(4.asInteger).asInteger, args.at(5.asInteger).asInteger)
     return 0
   }
