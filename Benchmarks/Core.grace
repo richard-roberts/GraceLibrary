@@ -23,7 +23,7 @@
 //   2018, June
 //
 
-def Array: List = platform.kernel.Array
+def Array: Unknown = platform.kernel.Array
 def initialSize: Number = 10.asInteger
 def initialCapacity: Number = 16.asInteger
 
@@ -91,7 +91,7 @@ class newVector (size': Number) -> Vector {
   var storage: List := Array.new(size')
 
   method at(index: Number) -> Unknown {
-    (index > storage.size).ifTrue { return Done }
+    (index > storage.size).ifTrue { return done }
     return storage.at(index)
   }
 
@@ -109,7 +109,7 @@ class newVector (size': Number) -> Vector {
       lastIdx := index + 1.asInteger
     }
 
-    Done
+    done
   }
 
   method append(element: Unknown) -> Vector {
@@ -129,7 +129,7 @@ class newVector (size': Number) -> Vector {
 
   method forEach(block: Invokable) -> Done {
     firstIdx.to (lastIdx - 1.asInteger) do { i: Number -> block.value(storage.at(i)) }
-    Done
+    done
   }
 
   method hasSome(block: Invokable) -> Boolean {
@@ -144,11 +144,11 @@ class newVector (size': Number) -> Vector {
       var e: Unknown := storage.at(i)
       block.value(e).ifTrue { return e }
     }
-    return Done
+    return done
   }
 
   method removeFirst -> Unknown {
-    isEmpty.ifTrue { return Done }
+    isEmpty.ifTrue { return done }
 
     firstIdx := firstIdx + 1.asInteger
     return storage.at(firstIdx - 1.asInteger)
@@ -158,7 +158,7 @@ class newVector (size': Number) -> Vector {
     firstIdx := 1.asInteger
     lastIdx  := 1.asInteger
     storage := Array.new (storage.size)
-    Done
+    done
   }
 
   method remove(obj: Unknown) -> Unknown {
@@ -192,7 +192,7 @@ class newVector (size': Number) -> Vector {
     (size > 0).ifTrue {
       sort (firstIdx) to (lastIdx - 1.asInteger) with (aBlock)
     }
-    Done
+    done
   }
 
   // Sort elements i through j of self to be non-descending according to
@@ -264,7 +264,7 @@ class newVector (size': Number) -> Vector {
     }
   }
 
-  Done
+  done
 }
 
 method newVector -> Vector {
@@ -282,7 +282,7 @@ class newSet(size': Number) -> Set {
 
   method forEach (block: Invokable) -> Done {
     items.forEach(block)
-    Done
+    done
   }
 
   method hasSome (block: Invokable) -> Boolean {return items.hasSome (block) }
@@ -291,7 +291,7 @@ class newSet(size': Number) -> Set {
 
   method add (anObject: Unknown) -> Done {
     contains(anObject).ifFalse { items.append(anObject) }
-    Done
+    done
   }
 
   method collect (block: Invokable) -> Vector {
@@ -364,7 +364,7 @@ class newDictionary(size': Number) -> Dictionary {
       e.match(hash)key(aKey).ifTrue { return e.value }
       e := e.next
     }
-    return Done
+    return done
   }
 
   method containsKey(aKey: Unknown) -> Boolean {
@@ -391,11 +391,11 @@ class newDictionary(size': Number) -> Dictionary {
     }
 
     (size_ > buckets.size).ifTrue { resize }
-    Done
+    done
   }
 
   method newEntryWithKeyValueHash(aKey: Unknown, value: Unknown, hash: Number) -> Entry {
-    return newEntryWithHashKeyValueNext (hash, aKey, value, Done)
+    return newEntryWithHashKeyValueNext (hash, aKey, value, done)
   }
 
   method insertBucketEntry(key: Unknown) value (value: Unknown) hash (hash: Number) head (head: Entry) -> Dictionary {
@@ -420,7 +420,7 @@ class newDictionary(size': Number) -> Dictionary {
     var oldStorage: List := buckets
     buckets := Array.new (oldStorage.size * 2.asInteger)
     transferEntries(oldStorage)
-    Done
+    done
   }
 
   method transferEntries(oldStorage: List) -> Done {
@@ -428,7 +428,7 @@ class newDictionary(size': Number) -> Dictionary {
       var current: Entry := oldStorage.at(i)
 
       current.notNil.ifTrue {
-        oldStorage.at (i) put (Done)
+        oldStorage.at (i) put (done)
         current.next.isNil.ifTrue {
           buckets.at (1.asInteger + (current.hash.bitAnd(buckets.size - 1.asInteger))) put (current)
         } ifFalse {
@@ -436,14 +436,14 @@ class newDictionary(size': Number) -> Dictionary {
         }
       }
     }
-    Done
+    done
   }
 
   method splitBucket(oldStorage: List) bucket (i: Number) head (head: Entry) -> Done {
-    var loHead: Entry := Done
-    var loTail: Entry := Done
-    var hiHead: Entry := Done
-    var hiTail: Entry := Done
+    var loHead: Entry := done
+    var loTail: Entry := done
+    var hiHead: Entry := done
+    var hiTail: Entry := done
     var current: Entry := head
 
     { current.notNil }. whileTrue {
@@ -466,16 +466,16 @@ class newDictionary(size': Number) -> Dictionary {
     }
 
     loTail.notNil.ifTrue {
-      loTail.next := Done
+      loTail.next := done
       buckets.at(i) put (loHead )
     }
 
     hiTail.notNil.ifTrue {
-      hiTail.next := Done
+      hiTail.next := done
       buckets.at(i + oldStorage.size) put (hiHead)
     }
 
-    Done
+    done
   }
 
   method size -> Number { return size_ }
@@ -485,7 +485,7 @@ class newDictionary(size': Number) -> Dictionary {
   method removeAll -> Done {
     buckets := Array.new(buckets.size)
     size_ := 0.asInteger
-    Done
+    done
   }
 
   method keys -> Vector {
@@ -528,7 +528,7 @@ class newIdentityDictionary(size': Number) -> Dictionary {
   }
 
   method newEntry(aKey: Unknown) value (value: Unknown) hash (hash: Number) -> Entry {
-    return newIdEntryWithHashKeyValueNext (hash, aKey, value, Done)
+    return newIdEntryWithHashKeyValueNext (hash, aKey, value, done)
   }
 }
 

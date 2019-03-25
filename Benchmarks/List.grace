@@ -33,7 +33,7 @@ type ListElement = interface {
 
 class newListElement(n: Number) -> ListElement {
   var val: Number := n
-  var next: ListElement := Done
+  var next: ListElement := done
 
   method length -> Number {
     next.isNil.ifTrue {
@@ -44,7 +44,7 @@ class newListElement(n: Number) -> ListElement {
   }
 }
 
-class newList -> Benchmark {
+class newList -> harness.Benchmark {
   inherit harness.newBenchmark
 
   method benchmark -> Number {
@@ -60,7 +60,7 @@ class newList -> Benchmark {
 
   method makeList(length: Number) -> ListElement {
     (length == 0).ifTrue {
-      return Done
+      return done
     } ifFalse {
       var e: ListElement := newListElement(length)
       e.next(makeList(length - 1.asInteger))
@@ -93,4 +93,4 @@ class newList -> Benchmark {
   }
 }
 
-method newInstance -> Benchmark { newList }
+method newInstance -> harness.Benchmark { newList }

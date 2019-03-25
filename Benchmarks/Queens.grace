@@ -24,13 +24,13 @@
 
 import "harness" as harness
 
-class newQueens -> Benchmark {
+class newQueens -> harness.Benchmark {
   inherit harness.newBenchmark
 
-  var freeMaxs: List := Done
-  var freeRows: List := Done
-  var freeMins: List := Done
-  var queenRows: List := Done
+  var freeMaxs: List
+  var freeRows: List
+  var freeMins: List
+  var queenRows: List
 
   method benchmark -> Boolean {
     var result: Boolean := true
@@ -80,4 +80,4 @@ class newQueens -> Benchmark {
   }
 }
 
-method newInstance -> Benchmark { newQueens }
+method newInstance -> harness.Benchmark { newQueens }

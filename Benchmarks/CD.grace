@@ -33,6 +33,7 @@
 import "harness" as harness
 import "Core" as core
 
+
 type Symbol = interface {
   customName
 }
@@ -146,7 +147,7 @@ def horizontal: Vector2D = newVector2DWith (GoodVoxelSize) and (0.0)
 def vertical: Vector2D = newVector2DWith (0.0) and (GoodVoxelSize)
 
 
-class newCD -> Benchmark {
+class newCD -> harness.Benchmark {
   inherit harness.newBenchmark
 
   method benchmark (numAircrafts: Number) -> Number {
@@ -159,7 +160,7 @@ class newCD -> Benchmark {
 
     0.asInteger.to (numFrames - 1.asInteger) do { i: Number ->
       var time: Number := i / 10.0
-      var collisions: Vector := detector.handleNewFrame(simulator.simulate(time))
+      var collisions: core.Vector := detector.handleNewFrame(simulator.simulate(time))
       actualCollisions := actualCollisions + collisions.size
     }
 
@@ -255,9 +256,9 @@ def blackSym: Symbol = blackSym
 class newNodeWith (key': CallSign) and (value': Unknown) -> Node {
   method key -> CallSign { key' }
   var value: Unknown := value'
-  var left: Node := Done
-  var right: Node := Done
-  var parent: Node := Done
+  var left: Node := done
+  var right: Node := done
+  var parent: Node := done
   var color: Symbol := redSym
 
   method successor -> Node {
@@ -287,7 +288,7 @@ class newInsertResult (isNewEntry': Boolean) node (newNode': Node) value (oldVal
 
 
 class newRedBlackTree -> RedBlackTree {
-  var root: Node := Done
+  var root: Node := done
 
   method at (key: CallSign) put (value: Unknown) -> Unknown {
     var insertionResult: InsertResult := treeAt (key) insert (value)
@@ -343,7 +344,7 @@ class newRedBlackTree -> RedBlackTree {
     }
 
     root.color(blackSym)
-    return Done
+    return done
   }
 
   method remove (key: CallSign) -> Unknown {
@@ -353,7 +354,7 @@ class newRedBlackTree -> RedBlackTree {
     var xParent: Node
 
     z := findNode(key)
-    z.isNil.ifTrue { return Done }
+    z.isNil.ifTrue { return done }
 
     // Y is the node to be unlinked from the tree.
     (z.left.isNil.or { z.right.isNil }). ifTrue {
@@ -421,7 +422,7 @@ class newRedBlackTree -> RedBlackTree {
 
   method at (key: CallSign) -> Unknown {
     var node: Node := findNode (key)
-    node.isNil.ifTrue { return Done }
+    node.isNil.ifTrue { return done }
     return node.value
   }
 
@@ -445,11 +446,11 @@ class newRedBlackTree -> RedBlackTree {
         current := current.right
       }
     }
-    return Done
+    return done
   }
 
   method treeAt (key: CallSign) insert (value: Unknown) -> InsertResult {
-    var y: Node := Done
+    var y: Node := done
     var x: Node := root
 
     { x.notNil }. whileTrue {
@@ -463,7 +464,7 @@ class newRedBlackTree -> RedBlackTree {
         } ifFalse {
           var oldValue: Unknown := x.value
           x.value(value)
-          return newInsertResult (false) node (Done) value (oldValue)
+          return newInsertResult (false) node (done) value (oldValue)
         }
       }
     }
@@ -480,7 +481,7 @@ class newRedBlackTree -> RedBlackTree {
       }
     }
 
-    return newInsertResult (true) node (z) value (Done)
+    return newInsertResult (true) node (z) value (done)
   }
 
   method leftRotate (x: Node) -> Node {
@@ -615,7 +616,7 @@ class newRedBlackTree -> RedBlackTree {
     }
 
     x.notNil.ifTrue { x.color(blackSym) }
-    Done
+    done
   }
 }
 
@@ -644,8 +645,8 @@ class newCollisionWith (aircraftA': CallSign) and (aircraftB': CallSign) pos (po
 class newCollisionDetector -> CollisionDectector {
   def state: RedBlackTree = newRedBlackTree
 
-  method handleNewFrame (frame: Vector) -> Vector {
-    var motions: Vector := core.newVector
+  method handleNewFrame (frame: core.Vector) -> core.Vector {
+    var motions: core.Vector := core.newVector
     var seen: RedBlackTree := newRedBlackTree
 
     frame.forEach { aircraft: Aircraft ->
@@ -662,7 +663,7 @@ class newCollisionDetector -> CollisionDectector {
     }
 
     // Remove aircraft that are no longer present
-    var toRemove: Vector := core.newVector
+    var toRemove: core.Vector := core.newVector
     state.forEach { e: EntryWithKeyValue ->
       seen.at (e.key).ifFalse {
         toRemove.append(e.key)
@@ -671,9 +672,9 @@ class newCollisionDetector -> CollisionDectector {
 
     toRemove.forEach { e: CallSign -> state.remove(e) }
 
-    var allReduced: Vector := reduceCollisionSet (motions)
-    var collisions: Vector := core.newVector
-    allReduced.forEach { reduced: Vector ->
+    var allReduced: core.Vector := reduceCollisionSet (motions)
+    var collisions: core.Vector := core.newVector
+    allReduced.forEach { reduced: core.Vector ->
       1.asInteger.to (reduced.size) do { i: Number ->
         var motion1: Motion := reduced.at (i)
         (i + 1.asInteger). to (reduced.size) do { j: Number ->
@@ -746,13 +747,13 @@ class newCollisionDetector -> CollisionDectector {
   }
 
   method put (motion: Motion) and (voxel: Vector2D) into (voxelMap: RedBlackTree) -> Done {
-    var array: Vector := voxelMap.at(voxel)
+    var array: core.Vector := voxelMap.at(voxel)
     array.isNil.ifTrue {
       array := core.newVector
       voxelMap.at (voxel) put (array)
     }
     array.append (motion)
-    Done
+    done
   }
 
   method recurse (voxelMap: RedBlackTree) seen (seen: RedBlackTree) voxel (nextVoxel: Vector2D) motion (motion: Motion) -> Done {
@@ -770,14 +771,14 @@ class newCollisionDetector -> CollisionDectector {
     recurse (voxelMap) seen (seen) voxel ((nextVoxel.minus (horizontal)). plus  (vertical)) motion (motion)
     recurse (voxelMap) seen (seen) voxel ((nextVoxel.plus  (horizontal)). minus (vertical)) motion (motion)
     recurse (voxelMap) seen (seen) voxel ((nextVoxel.plus  (horizontal)). plus  (vertical)) motion (motion)
-    Done
+    done
   }
 
-  method reduceCollisionSet (motions: Vector) -> Vector {
+  method reduceCollisionSet (motions: core.Vector) -> core.Vector {
     var voxelMap: RedBlackTree := newRedBlackTree
     motions.forEach { motion: Motion -> draw (motion) on (voxelMap) }
 
-    var result: Vector := core.newVector
+    var result: core.Vector := core.newVector
     voxelMap.forEach { e: EntryWithKeyValue ->
       (e.value.size > 1.asInteger). ifTrue { result.append(e.value) }
     }
@@ -800,7 +801,7 @@ class newCollisionDetector -> CollisionDectector {
   method draw (motion: Motion) on (voxelMap: RedBlackTree) -> Done {
     var seen: RedBlackTree := newRedBlackTree
     recurse (voxelMap) seen (seen) voxel (voxelHash(motion.posOne)) motion (motion)
-    Done
+    done
   }
 }
 
@@ -861,7 +862,7 @@ class newMotion (callsign': CallSign) old (posOne': Vector3D) new (posTwo': Vect
       var c: Number := ((0 - radius) * radius) + init2.minus(init1).squaredMagnitude
 
       var discr: Number := (b * b) - (4 * a * c)
-      (discr < 0).ifTrue { return Done }
+      (discr < 0).ifTrue { return done }
 
       var v1: Number := ((0 - b) - discr.sqrt) / (2 * a)
       var v2: Number := ((0 - b) + discr.sqrt) / (2 * a)
@@ -896,7 +897,7 @@ class newMotion (callsign': CallSign) old (posOne': Vector3D) new (posTwo': Vect
         }
       }
 
-      return Done
+      return done
     }
 
     // the planes have the same speeds and are moving in parallel (or they are not moving at all)
@@ -908,7 +909,7 @@ class newMotion (callsign': CallSign) old (posOne': Vector3D) new (posTwo': Vect
       return init1.plus(init2).times(0.5)
     }
 
-    return Done
+    return done
   }
 }
 
@@ -919,14 +920,14 @@ class newAircraft (callsign': CallSign) pos (position': Vector3D) -> Aircraft {
 
 class newSimulator(numAircrafts': Number) -> Simulator {
   method numAircrafts -> Number { numAircrafts' }
-  def aircrafts: Vector = core.newVector
+  def aircrafts: core.Vector = core.newVector
 
   0.asInteger.to (numAircrafts' - 1.asInteger) do { i: Number ->
     aircrafts.append(newCallSign(i))
   }
 
-  method simulate (time: Number) -> Vector {
-    var frame: Vector := core.newVector
+  method simulate (time: Number) -> core.Vector {
+    var frame: core.Vector := core.newVector
 
     0.asInteger.to (aircrafts.size - 2.asInteger) by (2.asInteger) do { i: Number ->
       frame.append (newAircraft (aircrafts.at(i + 1.asInteger))
@@ -950,4 +951,4 @@ method treeMinimum (x: Node) -> Node {
   return current
 }
 
-method newInstance -> Benchmark { newCD }
+method newInstance -> harness.Benchmark { newCD }

@@ -28,11 +28,11 @@ type Ball = interface {
   bounce
 }
 
-class newBounce -> Benchmark {
+class newBounce -> harness.Benchmark {
   inherit harness.newBenchmark
 
   method benchmark -> Number {
-    def random: Random = harness.newRandom
+    def random: harness.Random = harness.newRandom
 
     def ballCount: Number = 100.asInteger
     var bounces: Number := 0.asInteger
@@ -54,7 +54,7 @@ class newBounce -> Benchmark {
   }
 }
 
-class newBall(random: Random) -> Ball {
+class newBall(random: harness.Random) -> Ball {
   var x: Number := random.next % 500.asInteger
   var y: Number := random.next % 500.asInteger
   var xVel: Number := (random.next % 300.asInteger) - 150.asInteger
@@ -96,4 +96,4 @@ class newBall(random: Random) -> Ball {
   }
 }
 
-method newInstance -> Benchmark { newBounce }
+method newInstance -> harness.Benchmark { newBounce }

@@ -32,10 +32,10 @@ type TowerDisk = interface {
   size
 }
 
-class newTowers -> Benchmark {
+class newTowers -> harness.Benchmark {
   inherit harness.newBenchmark
 
-  var piles: List := Done
+  var piles: List := done
   var movesDone: Number := 0.asInteger
 
   method pushDisk (disk: TowerDisk) onPile (pile: Number) -> Done {
@@ -58,7 +58,7 @@ class newTowers -> Benchmark {
     }
 
     piles.at(pile)put(top.next)
-    top.next := Done
+    top.next := done
     top
   }
 
@@ -102,4 +102,4 @@ class newTowerDisk(size': Number) -> TowerDisk {
     method size -> Number { size' }
 }
 
-method newInstance -> Benchmark { newTowers }
+method newInstance -> harness.Benchmark { newTowers }

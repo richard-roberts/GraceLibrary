@@ -24,11 +24,11 @@
 
 import "harness" as harness
 
-class newFannkuchBenchmark -> Benchmark {
+class newFannkuchBenchmark -> harness.Benchmark {
   inherit harness.newBenchmark
 
-  var perm: List := Done
-  var timesRotated: List := Done
+  var perm: List
+  var timesRotated: List
   var atEnd: Boolean := false
 
   method innerBenchmarkLoop(innerIterations: Number) -> Boolean {
@@ -117,4 +117,4 @@ class newFannkuchBenchmark -> Benchmark {
   }
 }
 
-method newInstance -> Benchmark { newFannkuchBenchmark }
+method newInstance -> harness.Benchmark { newFannkuchBenchmark }

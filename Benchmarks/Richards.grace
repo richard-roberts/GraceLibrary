@@ -1,7 +1,7 @@
 import "harness" as harness
 
-def NoTask: Done = Done
-def NoWork: Done = Done
+def NoTask: Done = done
+def NoWork: Done = done
 
 def            Idler: Number = 1.asInteger
 def           Worker: Number = 2.asInteger
@@ -80,7 +80,7 @@ type WorkerTaskDataRecord = interface {
   count
 }
 
-class newRichards -> Benchmark {
+class newRichards -> harness.Benchmark {
   inherit harness.newBenchmark
 
   method benchmark() -> Boolean {
@@ -92,7 +92,7 @@ class newRichards -> Benchmark {
   }
 }
 
-class RBObject -> Done {
+class newRBObject -> RBObject {
   method append (packet: Packet) head (queueHead: Packet) -> Packet {
     packet.link(NoWork)
     (NoWork == queueHead).ifTrue { return packet }
@@ -120,7 +120,7 @@ class newScheduler -> Scheduler {
 
   method createDevice (identity: Number) priority (priority: Number)
                  work (work: Packet) state (state: TaskState) -> Done {
-      var data: DeviceTaskDataRecord := DeviceTaskDataRecord
+      var data: DeviceTaskDataRecord := newDeviceTaskDataRecord
 
       createTask (identity) priority (priority) work (work) state (state)
              function { work: Packet, word: RBObject ->
@@ -149,7 +149,7 @@ class newScheduler -> Scheduler {
 
   method createHandler (identity: Number) priority (priority: Number)
                   work (work: Packet) state (state: TaskState) -> Done {
-    var data: HandlerTaskDataRecord := HandlerTaskDataRecord
+    var data: HandlerTaskDataRecord := newHandlerTaskDataRecord
 
     createTask (identity) priority (priority) work (work) state (state)
          function { work: Packet, word: RBObject ->
@@ -189,7 +189,7 @@ class newScheduler -> Scheduler {
 
   method createIdler (identity: Number) priority (priority: Number)
                 work (work: Packet) state (state: TaskState) -> Done {
-    var data: IdleTaskDataRecord := IdleTaskDataRecord
+    var data: IdleTaskDataRecord := newIdleTaskDataRecord
     createTask(identity) priority(priority) work(work) state(state)
          function { work: Packet, word: RBObject ->
            var data: RBObject := word
@@ -226,7 +226,7 @@ class newScheduler -> Scheduler {
 
   method createWorker (identity: Number) priority (priority: Number)
                  work (work: Packet) state (state: TaskState) -> Done {
-    var data: WorkerTaskDataRecord := WorkerTaskDataRecord
+    var data: WorkerTaskDataRecord := newWorkerTaskDataRecord
     createTask (identity) priority(priority) work(work) state(state)
           function { work: Packet, word: RBObject ->
             var data: WorkerTaskDataRecord := word
@@ -348,13 +348,13 @@ class Packet (link': Packet) identity (identity': Number) kind (kind': Number) -
   }
 }
 
-class DeviceTaskDataRecord -> DeviceTaskDataRecord {
-  inherit RBObject
+class newDeviceTaskDataRecord -> DeviceTaskDataRecord {
+  inherit newRBObject
   var pending: Packet := NoWork
 }
 
-class HandlerTaskDataRecord -> HandlerTaskDataRecord {
-  inherit RBObject
+class newHandlerTaskDataRecord -> HandlerTaskDataRecord {
+  inherit newRBObject
   var workIn: Packet := NoWork
   var deviceIn: Packet := NoWork
 
@@ -371,15 +371,15 @@ class HandlerTaskDataRecord -> HandlerTaskDataRecord {
   }
 }
 
-class IdleTaskDataRecord -> IdleTaskDataRecord {
-  inherit RBObject
+class newIdleTaskDataRecord -> IdleTaskDataRecord {
+  inherit newRBObject
 
   var control: Number := 1.asInteger
   var count: Number := 10000.asInteger
 }
 
-class TaskState -> TaskState {
-  inherit RBObject
+class newTaskState -> TaskState {
+  inherit newRBObject
 
   var packetPending': Boolean
   var taskWaiting': Boolean
@@ -397,28 +397,28 @@ class TaskState -> TaskState {
     packetPending' := true
     taskWaiting' := false
     taskHolding' := false
-    Done
+    done
   }
 
   method running -> Done {
     packetPending' := false
     taskWaiting' := false
     taskHolding' := false
-    Done
+    done
   }
 
   method waiting -> Done {
     packetPending' := false
     taskHolding' := false
     taskWaiting' :=  true
-    Done
+    done
   }
 
   method waitingWithPacket -> Done {
     taskHolding' := false
     taskWaiting' := true
     packetPending' := true
-    Done
+    done
   }
 
   method isRunning -> Boolean {
@@ -439,31 +439,31 @@ class TaskState -> TaskState {
 }
 
 method newTaskStatePacketPending -> TaskState {
-  var ret: TaskState := TaskState
+  var ret: TaskState := newTaskState
   ret.packetPending
   ret
 }
 
 method newTaskStateRunning -> TaskState {
-  var ret: TaskState := TaskState
+  var ret: TaskState := newTaskState
   ret.running
   ret
 }
 
 method newTaskStateWaiting -> TaskState {
-  var ret: TaskState := TaskState
+  var ret: TaskState := newTaskState
   ret.waiting
   ret
 }
 
 method newTaskStateWaitingWithPacket -> TaskState {
-  var ret: TaskState := TaskState
+  var ret: TaskState := newTaskState
   ret.waitingWithPacket
   ret
 }
 
 class newTaskControlBlock (link': TaskControlBlock) create (identity': Number) priority (priority': Number) initialWorkQueue (initialWorkQueue': Packet) initialState (initialState': TaskState) function (aBlock': Invokable) privateData (privateData': RBObject) -> TaskControlBlock {
-  inherit TaskState
+  inherit newTaskState
 
   def link: TaskControlBlock = link'
   def identity: Number = identity'
@@ -511,11 +511,11 @@ class newTaskControlBlock (link': TaskControlBlock) create (identity': Number) p
   }
 }
 
-class WorkerTaskDataRecord -> WorkerTaskDataRecord {
-  inherit RBObject
+class newWorkerTaskDataRecord -> WorkerTaskDataRecord {
+  inherit newRBObject
 
   var destination: Number := HandlerA
   var count: Number := 0.asInteger
 }
 
-method newInstance -> Benchmark { newRichards }
+method newInstance -> harness.Benchmark { newRichards }

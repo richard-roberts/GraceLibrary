@@ -24,6 +24,10 @@
 
 import "harness" as harness
 
+type Vector = interface {
+  do(block)
+}
+
 def MinEdges: Number     = 2.asInteger
 def MaxInitEdges: Number = 4.asInteger
 def MinWeight: Number    = 1.asInteger
@@ -51,7 +55,7 @@ class newNode (starting': Number) and (noOfEdges': Number) -> Node {
   var noOfEdges: Number := noOfEdges'
 }
 
-class newGraphSearch -> Benchmark {
+class newGraphSearch -> harness.Benchmark {
   inherit harness.newBenchmark
 
   var graphNodes: List
@@ -62,7 +66,7 @@ class newGraphSearch -> Benchmark {
   var graphEdges: List
 
   method innerBenchmarkLoop(innerIterations: Number) -> Boolean {
-    def random: Random = harness.newJenkins(49734321.asInteger)
+    def random: harness.Random = harness.newJenkins(49734321.asInteger)
     def noOfNodes: Number = (ExpectedNoOfNodes / 1000.asInteger).asInteger * innerIterations
 
     initializeGraph (noOfNodes) with (random)
@@ -92,7 +96,7 @@ class newGraphSearch -> Benchmark {
     false
   }
 
-  method initializeGraph (noOfNodes: Number) with (random: Random) -> Done {
+  method initializeGraph (noOfNodes: Number) with (random: harness.Random) -> Done {
     graphNodes         := platform.kernel.Array.new (noOfNodes)
     graphMask          := platform.kernel.Array.new (noOfNodes) withAll(false)
     updatingGraphMask  := platform.kernel.Array.new (noOfNodes) withAll(false)
@@ -126,8 +130,8 @@ class newGraphSearch -> Benchmark {
     graphEdges := platform.kernel.Array.new (totalEdges) withAll (0.asInteger)
 
     var k: Number := 1.asInteger
-    graph.do { i: Number ->
-      i.do { j: Number ->
+    graph.do { i: Vector ->
+      i.do { j: Edge ->
         graphEdges.at (k) put (j.dest)
         k := k + 1.asInteger
       }
@@ -167,4 +171,4 @@ class newGraphSearch -> Benchmark {
   }
 }
 
-method newInstance -> Benchmark { newGraphSearch }
+method newInstance -> harness.Benchmark { newGraphSearch }

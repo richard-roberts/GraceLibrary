@@ -72,12 +72,12 @@ class newSnake(segments': List) -> Snake {
   method slither -> Done {
     segments.append(nextHead)
     segments.remove(segments.at(1.asInteger))
-    Done
+    done
   }
 
   method grow -> Done {
     segments.append(nextHead)
-    Done
+    done
   }
 
   method isTouching(position: Position) -> Boolean {
@@ -107,7 +107,7 @@ class newWorld -> World {
   var snake: Snake
   var food: Position
   var moves: Number := 0.asInteger
-  var random: Random
+  var random: harness.Random
 
   method reset -> Done {
     random := harness.newRandom
@@ -152,19 +152,19 @@ class newWorld -> World {
   method handleKey (key: String) -> Done {
     (key == "w"). ifTrue {
       snake.direction := "up"
-      return Done
+      return done
     }
     (key == "s"). ifTrue {
       snake.direction := "down"
-      return Done
+      return done
     }
     (key == "a"). ifTrue {
       snake.direction := "left"
-      return Done
+      return done
     }
     (key == "d"). ifTrue {
       snake.direction := "right"
-      return Done
+      return done
     }
 
     error("{key} not understood as a key?")
@@ -211,17 +211,17 @@ method replay (world': World, history': List) -> Done {
       world.tick
       // world.render
       world.isGameOver.ifTrue {
-        return Done
+        return done
       }
     } ifFalse {
       world.handleKey(item)
     }
   }
 
-  Done
+  done
 }
 
-class newSnakeBenchmark -> Benchmark {
+class newSnakeBenchmark -> harness.Benchmark {
   inherit harness.newBenchmark
 
   def world: World = newWorld
@@ -258,4 +258,4 @@ class newSnakeBenchmark -> Benchmark {
   }
 }
 
-method newInstance -> Benchmark { newSnakeBenchmark }
+method newInstance -> harness.Benchmark { newSnakeBenchmark }

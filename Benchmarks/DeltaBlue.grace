@@ -81,8 +81,8 @@ def SymDefault           : Sym = newSym(5.asInteger)
 def SymWeakDefault       : Sym = newSym(6.asInteger)
 def SymAbsoluteWeakest   : Sym = newSym(7.asInteger)
 
-def strengthTable: Dictionary = createStrengthTable
-def strengthConstants: Dictionary = createStrengthConstants
+def strengthTable: core.Dictionary = createStrengthTable
+def strengthConstants: core.Dictionary = createStrengthConstants
 
 def AbsoluteStrongest : Strength = strengthOf(SymAbsoluteStrongest)
 def AbsoluteWeakest   : Strength = strengthOf(SymAbsoluteWeakest)
@@ -99,7 +99,7 @@ class newDirection(name': String) -> Direction {
   method directionName -> String { name' }
 }
 
-class newDeltaBlue -> Benchmark {
+class newDeltaBlue -> harness.Benchmark {
   inherit harness.newBenchmark
 
   method innerBenchmarkLoop(innerIterations: Number) -> Boolean {
@@ -113,7 +113,7 @@ class newDeltaBlue -> Benchmark {
 // resatisfy all currently satisfiable constraints in the face of one or more
 // changing inputs.
 
-class newPlan -> Vector {
+class newPlan -> core.Vector {
   inherit core.newVector(15.asInteger)
 
   method execute -> Done {
@@ -155,7 +155,7 @@ class newPlanner -> Planner {
     // an inadvertent cycle.
     def mark: Number = newMark
     var overridden: Constraint := c.satisfy(mark) propagate(self)
-    { overridden == Done }.whileFalse {
+    { overridden == done }.whileFalse {
         overridden := overridden.satisfy(mark)propagate(self)
     }
   }
@@ -174,20 +174,20 @@ class newPlanner -> Planner {
     def out: Variable = c.output
     c.markUnsatisfied
     c.removeFromGraph
-    def unsatisfied: Vector = removePropagateFrom(out)
+    def unsatisfied: core.Vector = removePropagateFrom(out)
     unsatisfied.forEach { u: Constraint -> incrementalAdd(u) }
   }
 
-  method extractPlanFromConstraints(constraints: Vector) -> Plan {
+  method extractPlanFromConstraints(constraints: core.Vector) -> Plan {
     // Extract a plan for resatisfaction starting from the outputs of the
     // given constraints, usually a set of input constraints.
-    def sources: Vector = core.newVector()
+    def sources: core.Vector = core.newVector()
     constraints.forEach { c: Constraint ->
       (c.isInput.and { c.isSatisfied }).ifTrue { sources.append(c) } }
     return makePlan(sources)
   }
 
-  method makePlan(sources: Vector) -> Plan {
+  method makePlan(sources: core.Vector) -> Plan {
     // Extract a plan for resatisfaction starting from the given satisfied
     // source constraints, usually a set of input constraints. This method
     // assumes that stay optimization is desired; the plan will contain only
@@ -206,7 +206,7 @@ class newPlanner -> Planner {
     // not computed by any constraint. *)
     def mark: Number = newMark
     def plan: Plan = newPlan
-    def todo: Vector = sources
+    def todo: core.Vector = sources
     { todo.isEmpty }.whileFalse {
        def c: Constraint = todo.removeFirst
        ((c.output.mark != mark).and {
@@ -223,7 +223,7 @@ class newPlanner -> Planner {
 
   method propagateFrom(v: Variable) -> Done {
     // The given variable has changed. Propagate new values downstream.
-    def todo: Vector = core.newVector
+    def todo: core.Vector = core.newVector
     addConstraintsConsuming(v)to(todo)
     {todo.isEmpty}.whileFalse {
       def c: Constraint = todo.removeFirst
@@ -232,7 +232,7 @@ class newPlanner -> Planner {
     }
   }
 
-  method addConstraintsConsuming(v: Variable)to(aCollection: Vector) -> Done {
+  method addConstraintsConsuming(v: Variable)to(aCollection: core.Vector) -> Done {
     def determiningC: Constraint = v.determinedBy
     v.constraints.forEach { c: Constraint ->
       ((c == determiningC).or { !c.isSatisfied }).ifFalse {
@@ -253,7 +253,7 @@ class newPlanner -> Planner {
     // encountering a marked node downstream of the output constraint means
     // that there is a path from the constraint's output to one of its
     // inputs
-    def todo: Vector = core.newVectorWith(c)
+    def todo: core.Vector = core.newVectorWith(c)
     { todo.isEmpty }.whileFalse {
       def d: Constraint = todo.removeFirst
       (d.output.mark == mark).ifTrue {
@@ -297,16 +297,16 @@ class newPlanner -> Planner {
     return currentMark
   }
 
-  method removePropagateFrom(out: Variable) -> Vector {
+  method removePropagateFrom(out: Variable) -> core.Vector {
     // Update the walkabout strengths and stay flags of all variables
     // downstream of the given constraint. Answer a collection of unsatisfied
     // constraints sorted in order of decreasing strength.
-    def unsatisfied: Vector = core.newVector
+    def unsatisfied: core.Vector = core.newVector
 
-    out.determinedBy(Done)
+    out.determinedBy(done)
     out.walkStrength(AbsoluteWeakest)
     out.stay(true)
-    def todo: Vector = core.newVectorWith(out)
+    def todo: core.Vector = core.newVectorWith(out)
     { todo.isEmpty }.whileFalse {
       def v: Variable = todo.removeFirst
       v.constraints.forEach { c: Constraint ->
@@ -352,7 +352,7 @@ method plannerProjectionTest(n: Number) -> Done {
   // This test constructs a two sets of variables related to each other by
   // a simple linear transformation (scale and offset).
   def planner: Planner = newPlanner
-  def dests: Vector = core.newVector
+  def dests: core.Vector = core.newVector
   def scale: Variable = newVariableValue(10.asInteger)
   def offset: Variable = newVariableValue(1000.asInteger)
 
@@ -441,9 +441,9 @@ class newStrength(symVal: Sym) -> Strength {
   }
 }
 
-method createStrengthTable -> Dictionary {
+method createStrengthTable -> core.Dictionary {
   // Initialize the symbolic strength table.
-  def table: Dictionary = core.newIdentityDictionary
+  def table: core.Dictionary = core.newIdentityDictionary
   table.at(SymAbsoluteStrongest)put(-10000)
   table.at(SymRequired)put(-800)
   table.at(SymStrongPreferred)put(-600)
@@ -455,8 +455,8 @@ method createStrengthTable -> Dictionary {
   table
 }
 
-method createStrengthConstants -> Dictionary {
-  def constants: Dictionary = core.newIdentityDictionary
+method createStrengthConstants -> core.Dictionary {
+  def constants: core.Dictionary = core.newIdentityDictionary
   strengthTable.keys.forEach { strengthSymbol: Sym ->
     constants.
       at(strengthSymbol)
@@ -540,7 +540,7 @@ class newAbstractConstraint(strengthSymbol: Sym) -> Constraint {
     //  that it has been computed by a constraint appearing earlier in the
     //  plan), or c) it is not determined by any constraint.
     !(inputsHasOne { v: Variable ->
-       !((v.mark == mark).or { v.stay.or { v.determinedBy == Done } })
+       !((v.mark == mark).or { v.stay.or { v.determinedBy == done } })
     })
   }
 
@@ -576,16 +576,16 @@ class newAbstractConstraint(strengthSymbol: Sym) -> Constraint {
       inputsDo { in: Variable -> in.mark(mark) }
       def out: Variable = output
       overridden := out.determinedBy
-      (overridden == Done).ifFalse { overridden.markUnsatisfied }
+      (overridden == done).ifFalse { overridden.markUnsatisfied }
       out.determinedBy(self)
       planner.addPropagate(self) mark(mark).ifFalse {
         error("Cycle encountered adding:\tConstraint removed.")
-        return Done
+        return done
       }
       out.mark(mark)
     } ifFalse {
       // constraint cannot be satisfied
-      overridden := Done
+      overridden := done
       strength.sameAs(Required).ifTrue {
         error("Failed to satisfy a required constraint")
       }
@@ -608,25 +608,25 @@ class newBinaryConstraint(var1: Variable, var2: Variable, strengthSymbol: Sym, p
   //                     nil (not satisfied)
   def v1: Variable = var1
   def v2: Variable = var2
-  var direction: Direction := Done
+  var direction: Direction := done
 
   method isSatisfied -> Boolean {
     // Answer true if this constraint is satisfied in the current solution.
-    direction != Done
+    direction != done
   }
 
   method addToGraph -> Done {
     // Add myself to the constraint graph.
     v1.addConstraint(self)
     v2.addConstraint(self)
-    direction := Done
+    direction := done
   }
 
   method removeFromGraph -> Done {
     // Remove myself from the constraint graph.
-    (v1 == Done).ifFalse { v1.removeConstraint(self) }
-    (v2 == Done).ifFalse { v2.removeConstraint(self) }
-    direction := Done
+    (v1 == done).ifFalse { v1.removeConstraint(self) }
+    (v2 == done).ifFalse { v2.removeConstraint(self) }
+    direction := done
   }
 
   method chooseMethod(mark: Number) -> Direction {
@@ -642,7 +642,7 @@ class newBinaryConstraint(var1: Variable, var2: Variable, strengthSymbol: Sym, p
           return direction
         }
         ifFalse {
-          direction := Done
+          direction := done
           return direction
         }
     }
@@ -655,7 +655,7 @@ class newBinaryConstraint(var1: Variable, var2: Variable, strengthSymbol: Sym, p
             return direction
           }
           ifFalse {
-            direction := Done
+            direction := done
             return direction
           }
      }
@@ -669,7 +669,7 @@ class newBinaryConstraint(var1: Variable, var2: Variable, strengthSymbol: Sym, p
             return direction
           }
           ifFalse {
-            direction := Done
+            direction := done
             return direction
           }
       }
@@ -680,7 +680,7 @@ class newBinaryConstraint(var1: Variable, var2: Variable, strengthSymbol: Sym, p
             return direction
           }
           ifFalse {
-            direction := Done
+            direction := done
             return direction
           }
       }
@@ -706,7 +706,7 @@ class newBinaryConstraint(var1: Variable, var2: Variable, strengthSymbol: Sym, p
 
   method markUnsatisfied -> Done {
     // Record the fact that I am unsatisfied.
-    direction := Done
+    direction := done
   }
 
   method output -> Variable {
@@ -764,7 +764,7 @@ class newUnaryConstraint(aVariable: Variable, strengthSymbol: Sym, planner: Plan
 
   method removeFromGraph -> Done {
     // Remove myself from the constraint graph.
-    (output == Done).ifFalse { output.removeConstraint(self) }
+    (output == done).ifFalse { output.removeConstraint(self) }
     satisfied := false
   }
 
@@ -773,7 +773,7 @@ class newUnaryConstraint(aVariable: Variable, strengthSymbol: Sym, planner: Plan
     satisfied :=
       (output.mark != mark).and {
         strength.stronger(output.walkStrength) }
-    Done
+    done
   }
 
   method execute -> Done {
@@ -855,16 +855,16 @@ class newScaleConstraint(srcVar: Variable, scaleVar: Variable,
     v2.addConstraint(self)
     scale.addConstraint(self)
     offset.addConstraint(self)
-    direction := Done
+    direction := done
   }
 
   method removeFromGraph -> Done {
     // Remove myself from the constraint graph.
-    (v1 == Done).ifFalse { v1.removeConstraint(self) }
-    (v2 == Done).ifFalse { v2.removeConstraint(self) }
-    (scale == Done).ifFalse { scale.removeConstraint(self) }
-    (offset == Done).ifFalse { offset.removeConstraint(self) }
-    direction := Done
+    (v1 == done).ifFalse { v1.removeConstraint(self) }
+    (v2 == done).ifFalse { v2.removeConstraint(self) }
+    (scale == done).ifFalse { scale.removeConstraint(self) }
+    (offset == done).ifFalse { offset.removeConstraint(self) }
+    direction := done
   }
 
   method execute -> Done {
@@ -936,8 +936,8 @@ class newVariable -> Variable {
   //     stay            true if I am a planning-time constant <Boolean>
   //     mark            used by the planner to mark constraints <Number> *)
   var value: Number        := 0.asInteger
-  def constraints: Vector  = core.newVector(2.asInteger)
-  var determinedBy: Constraint := Done
+  def constraints: core.Vector  = core.newVector(2.asInteger)
+  var determinedBy: Constraint := done
   var walkStrength: Strength   := AbsoluteWeakest
   var stay: Boolean            := true
   var mark: Number             := 0.asInteger
@@ -951,7 +951,7 @@ class newVariable -> Variable {
   method removeConstraint(c: Constraint) -> Done {
     // Remove all traces of c from this variable
     constraints.remove(c)
-    (determinedBy == c).ifTrue { determinedBy := Done }
+    (determinedBy == c).ifTrue { determinedBy := done }
   }
 }
 
@@ -961,4 +961,4 @@ method newVariableValue(aValue: Number) -> Variable {
   o
 }
 
-method newInstance -> Benchmark { newDeltaBlue }
+method newInstance -> harness.Benchmark { newDeltaBlue }

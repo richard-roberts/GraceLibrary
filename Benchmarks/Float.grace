@@ -37,7 +37,7 @@ class newPoint(i: Number) -> Point {
   }
 }
 
-class newFloat -> Benchmark {
+class newFloat -> harness.Benchmark {
   inherit harness.newBenchmark
 
   method innerBenchmarkLoop(innerIterations: Number) -> Boolean {
@@ -77,4 +77,4 @@ class newFloat -> Benchmark {
   }
 }
 
-method newInstance -> Benchmark { newFloat }
+method newInstance -> harness.Benchmark { newFloat }

@@ -10,7 +10,7 @@
 
 import "harness" as harness
 
-class newSpectralNorm -> Benchmark {
+class newSpectralNorm -> harness.Benchmark {
   inherit harness.newBenchmark
 
 
@@ -48,7 +48,7 @@ class newSpectralNorm -> Benchmark {
         }
     }
 
-    Done
+    done
   }
 
   method multiplyAtv(n: Number, v: List, atv: List) -> Done {
@@ -59,7 +59,7 @@ class newSpectralNorm -> Benchmark {
         }
     }
 
-    Done
+    done
   }
 
   method multiplyAtAv(n: Number, v: List, atAv: List) -> Done {
@@ -67,7 +67,7 @@ class newSpectralNorm -> Benchmark {
     1.asInteger.to(n) do { i: Number -> u.append(0) }
     multiplyAv(n,v,u)
     multiplyAtv(n,u,atAv)
-    Done
+    done
   }
 
 
@@ -84,4 +84,4 @@ class newSpectralNorm -> Benchmark {
   }
 }
 
-method newInstance -> Benchmark { newSpectralNorm }
+method newInstance -> harness.Benchmark { newSpectralNorm }

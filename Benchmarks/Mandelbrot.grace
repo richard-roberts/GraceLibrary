@@ -50,7 +50,7 @@
 
 import "harness" as harness
 
-class newMandelbrot -> Benchmark {
+class newMandelbrot -> harness.Benchmark {
   inherit harness.newBenchmark
 
   method innerBenchmarkLoop(innerIterations: Number) -> Boolean {
@@ -131,4 +131,4 @@ class newMandelbrot -> Benchmark {
   }
 }
 
-method newInstance -> Benchmark { newMandelbrot }
+method newInstance -> harness.Benchmark { newMandelbrot }

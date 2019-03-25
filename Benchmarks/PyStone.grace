@@ -29,7 +29,7 @@ type Record = interface {
     asString
 }
 
-class Record(ptrComp': Record, discr': Number, enumComp': Number, intComp': Number, stringComp': String) -> Record {
+class newRecord(ptrComp': Record, discr': Number, enumComp': Number, intComp': Number, stringComp': String) -> Record {
     var    ptrComp: Record := ptrComp'
     var      discr: Number := discr'
     var   enumComp: Number := enumComp'
@@ -37,7 +37,7 @@ class Record(ptrComp': Record, discr': Number, enumComp': Number, intComp': Numb
     var stringComp: String := stringComp'
 
     method copy -> Record {
-        Record(ptrComp, discr, enumComp, intComp, stringComp)
+        newRecord(ptrComp, discr, enumComp, intComp, stringComp)
     }
 
     method asString -> String {
@@ -45,8 +45,8 @@ class Record(ptrComp': Record, discr': Number, enumComp': Number, intComp': Numb
     }
 }
 
-method Record -> Record {
-    Record(Done, 0, 0, 0, "")
+method newRecord -> Record {
+    newRecord(done, 0, 0, 0, "")
 }
 
 var intGlob: Number := 0.asInteger
@@ -61,8 +61,8 @@ var ptrGlb: Record
 // Procedures
 
 method proc0(innerIterations: Number) -> Done {
-    ptrGlb := Record
-    ptrGlb.ptrComp := Record
+    ptrGlb := newRecord
+    ptrGlb.ptrComp := newRecord
     ptrGlb.discr := IDENT_1
     ptrGlb.enumComp := IDENT_3
     ptrGlb.intComp := 40.asInteger
@@ -132,7 +132,7 @@ method proc1(ptrParIn': Record) -> Record {
         ptrParIn := nextRecord.copy()
     }
 
-    nextRecord.ptrComp := Done
+    nextRecord.ptrComp := done
     ptrParIn
 }
 
@@ -168,13 +168,13 @@ method proc4 -> Done {
     var boolLoc: Boolean := char1Glob == "A"
     var boolLoc: Boolean := boolLoc || boolGlob
     char2_glob := "B"
-    Done
+    done
 }
 
 method proc5 -> Done {
     char1Glob := "A"
     boolGlob := false
-    Done
+    done
 }
 
 method proc6(enumParIn: Number) -> Number {
@@ -212,7 +212,7 @@ method proc8(array1Par: List, array2Par: List, intParI1: Number, intParI2: Numbe
     array2Par.at ( intLoc + 21.asInteger ) .at (intLoc + 1.asInteger) put( array1Par.at (intLoc + 1.asInteger)                          )
 
     intGlob := 5.asInteger
-    Done
+    done
 }
 
 //
@@ -262,7 +262,7 @@ method func3(enumParIn: Number) -> Boolean {
     return (enumLoc == IDENT_3).ifTrue { true } ifFalse { false }
 }
 
-class newPyStone -> Benchmark {
+class newPyStone -> harness.Benchmark {
     inherit harness.newBenchmark
 
     method innerBenchmarkLoop(innerIterations: Number) -> Boolean {
@@ -278,4 +278,4 @@ class newPyStone -> Benchmark {
     }
 }
 
-method newInstance -> Benchmark { newPyStone }
+method newInstance -> harness.Benchmark { newPyStone }

@@ -36,7 +36,7 @@ def DaysPerYear: Number = 365.24
 def SolarMass: Number   = 4.0 * Pi * Pi
 
 
-class newNBody -> Benchmark {
+class newNBody -> harness.Benchmark {
   inherit harness.newBenchmark
 
   method innerBenchmarkLoop (innerIterations: Number) -> Boolean {
@@ -204,4 +204,4 @@ method sun -> Body {
   return b
 }
 
-method newInstance -> Benchmark { newNBody }
+method newInstance -> harness.Benchmark { newNBody }

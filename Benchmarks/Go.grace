@@ -10,7 +10,7 @@ def maxmoves: Number = size * size * 3
 
 var globalTimestamp: Number := 0.asInteger
 var globalMoves: Number := 0.asInteger
-var random: Random := Done
+var random: harness.Random := done
 
 method toPos(x': Number, y': Number) -> Number {
   var x: Number := x'
@@ -60,9 +60,9 @@ class newSquare(board': Board, pos': Number) -> Square {
   var timestamp: Number := globalTimestamp
   var removestamp: Number := globalTimestamp
   def zobristStrings: List = [random.next, random.next, random.next]
-  var neighbours: List := Done
+  var neighbours: List := done
   var color: Number := 0.asInteger
-  var reference: Square := Done
+  var reference: Square := done
   var ledges: Number := 0.asInteger
   var used: Boolean := false
   var tempLedges: Number := 0.asInteger
@@ -165,7 +165,7 @@ class newEmptySet(board': Board) -> EmptySet {
   emptyPos.appendAll(0.asInteger.to((size * size) - 1.asInteger))
 
   method randomChoice -> Number {
-    def choices: Number = empties.size
+    var choices: Number := empties.size
     {choices > 0.asInteger}.whileTrue {
       // print("choices " + choices)
       def i: Number = (random.next % choices)
@@ -201,7 +201,7 @@ class newEmptySet(board': Board) -> EmptySet {
 
 class newZobristHash(board': Board) -> ZobristHash {
   def board: Board = board'
-  def hashSet: Done = platform.collections.Set.new
+  def hashSet: Unknown = platform.collections.Set.new
   var hash: Number := 0.asInteger
   board.squares.do { square: Square ->
     hash := hash.bitXor(square.zobristStrings.at(empty))
@@ -224,12 +224,12 @@ class newZobristHash(board': Board) -> ZobristHash {
 }
 
 class newBoard -> Board {
-  var emptyset: EmptySet := Done
-  var zobrist: ZobristHash := Done
+  var emptyset: EmptySet := done
+  var zobrist: ZobristHash := done
   var color: Number := empty
   var finished: Boolean := false
   var lastmove: Number := -2.asInteger
-  var history: List := Done
+  var history: List := done
   var whiteDead: Number := 0.asInteger
   var blackDead: Number := 0.asInteger
 
@@ -394,13 +394,13 @@ class newBoard -> Board {
   method check -> Done {
     squares.do { square: Square ->
       if (square.color != empty) then {
-        def members1: Done = platform.collections.Set.new
+        def members1: Unknown = platform.collections.Set.new
         members1.add(square)
 
         var changed: Boolean := true
         { changed }.whileTrue {
           changed := false
-          def copy: Done = platform.collections.Set.new
+          def copy: Unknown = platform.collections.Set.new
           copy.addAll(members1)
           copy.do { member: Square ->
             member.neighbours.do { neighbour: Square ->
@@ -426,7 +426,7 @@ class newBoard -> Board {
         // print 'members1', square, root, members1
         // print 'ledges1', square, ledges1
 
-        def members2: Done = platform.collections.Set.new
+        def members2: Unknown = platform.collections.Set.new
         squares.do { square2: Square ->
           if ((square2.color != empty) && (square2.find() == root)) then {
             members2.add(square2)
@@ -457,13 +457,13 @@ type Node = interface {
 }
 
 class newUCTNode -> Node {
-  var bestchild: Node := Done
+  var bestchild: Node := done
   var pos: Number := -1.asInteger
   var wins: Number := 0.asInteger
   var losses: Number := 0.asInteger
-  var parent: Node := Done
+  var parent: Node := done
   def posChild: List = platform.kernel.Array.new(size * size)
-  var unexplored: List := Done
+  var unexplored: List := done
 
   method playLoop(board: Board, node': Node, path: List) -> Done {
     var node: Node := node'
@@ -474,7 +474,7 @@ class newUCTNode -> Node {
       }
       board.move(pos)
       var child: Node := node.posChild.at(pos + 1.asInteger)
-      (child == Done).ifTrue {
+      (child == done).ifTrue {
         child := newUCTNode()
         node.posChild.at(pos + 1.asInteger)put(child)
         child.unexplored := board.usefulMoves()
@@ -502,7 +502,7 @@ class newUCTNode -> Node {
 
   method select() -> Number {
     // select move; unexplored children first, then according to uct value
-    ((unexplored ~= Done) && (!unexplored.isEmpty)).ifTrue {
+    ((unexplored ~= done) && (!unexplored.isEmpty)).ifTrue {
         // print("unexplored.size " + unexplored.size)
         def i: Number = (random.next % unexplored.size) + 1.asInteger
         def pos: Number = unexplored.at(i)
@@ -510,7 +510,7 @@ class newUCTNode -> Node {
         unexplored.remove()
         return pos
     } ifFalse {
-      (bestchild ~= Done).ifTrue {
+      (bestchild ~= done).ifTrue {
         return bestchild.pos
       } ifFalse {
         return pass
@@ -547,7 +547,7 @@ class newUCTNode -> Node {
         node.losses := node.losses + 1.asInteger
       }
 
-      (node.parent == Done).ifFalse {
+      (node.parent == done).ifFalse {
         node.parent.bestchild := node.parent.bestChild()
       }
     }
@@ -565,9 +565,9 @@ class newUCTNode -> Node {
 
   method bestChild -> Node {
     var maxscore: Number := -1.asInteger
-    var maxchild: Node := Done
+    var maxchild: Node := done
     posChild.do { child: Node ->
-      (child == Done).ifFalse {
+      (child == done).ifFalse {
         (child.score() > maxscore).ifTrue {
           maxchild := child
           maxscore := child.score()
@@ -579,11 +579,11 @@ class newUCTNode -> Node {
 
   method bestVisited -> Node {
     var maxvisits: Number := -1.asInteger
-    var maxchild: Node := Done
+    var maxchild: Node := done
     posChild.do { child: Node ->
       // if child:
       //   print to_xy(child.pos), child.wins, child.losses, child.score()
-      (child == Done).ifFalse {
+      (child == done).ifFalse {
         ((child.wins + child.losses) > maxvisits).ifTrue {
           maxvisits := child.wins + child.losses
           maxchild := child
@@ -594,7 +594,7 @@ class newUCTNode -> Node {
   }
 }
 
-class newGo -> Benchmark {
+class newGo -> harness.Benchmark {
   inherit harness.newBenchmark
 
   method innerBenchmarkLoop(innerIterations: Number) -> Boolean {
@@ -639,4 +639,4 @@ class newGo -> Benchmark {
   }
 }
 
-method newInstance -> Benchmark { newGo }
+method newInstance -> harness.Benchmark { newGo }

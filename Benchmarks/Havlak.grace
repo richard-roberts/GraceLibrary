@@ -20,7 +20,7 @@
 import "harness" as harness
 import "Core" as core
 
-def Array: List = platform.kernel.Array
+def Array: Unknown = platform.kernel.Array
 
 type BasicBlockType = interface {
   bbName
@@ -144,7 +144,7 @@ type HavlakLoopFinder = interface {
   stepD(w)nodePool(nodePool)
 }
 
-class newHavlak -> Benchmark {
+class newHavlak -> harness.Benchmark {
   inherit harness.newBenchmark
 
   method innerBenchmarkLoop (innerIterations: Number) -> Boolean {
@@ -170,20 +170,20 @@ class newHavlak -> Benchmark {
 }
 
 class newBasicBlock (name': Number) -> BasicBlock {
-  def inEdges: Vector  = core.newVector(2.asInteger)
-  def outEdges: Vector = core.newVector(2.asInteger)
+  def inEdges: core.Vector  = core.newVector(2.asInteger)
+  def outEdges: core.Vector = core.newVector(2.asInteger)
   def name: Number = name'
 
   method numPred -> Number { return inEdges.size }
 
   method addOutEdge (to: BasicBlock) -> Done {
     outEdges.append (to)
-    Done
+    done
   }
 
   method addInEdge (from: BasicBlock) -> Done {
     inEdges.append (from)
-    Done
+    done
   }
 
   method customHash -> Number { return name }
@@ -199,9 +199,9 @@ class newBasicBlockEdgeFor (cfg: ControlFlowGraph) from (fromName: Number) to (t
 }
 
 class newControlFlowGraph -> ControlFlowGraph {
-  def basicBlockMap: Vector = core.newVector
-  var startNode: BasicBlock := Done
-  def edgeList: Vector = core.newVector
+  def basicBlockMap: core.Vector = core.newVector
+  var startNode: BasicBlock := done
+  def edgeList: core.Vector = core.newVector
 
   method createNode(name: Number) -> BasicBlock {
     var node: BasicBlock
@@ -219,7 +219,7 @@ class newControlFlowGraph -> ControlFlowGraph {
 
   method addEdge(edge: BasicBlockEdge) -> Done {
     edgeList.append(edge)
-    Done
+    done
   }
 
   method numNodes -> Number {
@@ -230,14 +230,14 @@ class newControlFlowGraph -> ControlFlowGraph {
     return startNode
   }
 
-  method basicBlocks -> Vector {
+  method basicBlocks -> core.Vector {
     return basicBlockMap
   }
 }
 
 class newLoopStructureGraph -> LoopStructureGraph {
-  def root: SimpleLoop = newSimpleLoopWithBasicBlock (Done) reducible (false)
-  def loops: Vector = core.newVector
+  def root: SimpleLoop = newSimpleLoopWithBasicBlock (done) reducible (false)
+  def loops: core.Vector = core.newVector
   var loopCounter: Number := 0.asInteger
 
   root.nestingLevel(0.asInteger)
@@ -262,7 +262,7 @@ class newLoopStructureGraph -> LoopStructureGraph {
       }
     }
     calculateNestingLevelRec (root) depth (0.asInteger)
-    Done
+    done
   }
 
   method calculateNestingLevelRec (loop: SimpleLoop) depth (depth: Number) -> Done {
@@ -271,7 +271,7 @@ class newLoopStructureGraph -> LoopStructureGraph {
       calculateNestingLevelRec (liter) depth (depth + 1.asInteger)
       loop.nestingLevel (loop.nestingLevel.max(1.asInteger + liter.nestingLevel))
     }
-    Done
+    done
   }
 
   method numLoops -> Number {
@@ -284,14 +284,14 @@ class newSimpleLoopWithBasicBlock (bb: BasicBlock) reducible (isReducible': Bool
   var counter: Number := 0.asInteger
   var depthLevel: Number := 0.asInteger
 
-  var parent_: SimpleLoop := Done
+  var parent_: SimpleLoop := done
   var isRoot_: Boolean  := false
   var nestingLevel_: Number := 0.asInteger
 
   def header: BasicBlock = bb
   def isReducible: Boolean = isReducible'
-  def basicBlocks: Set = core.newIdentitySet
-  def children: Set = core.newIdentitySet
+  def basicBlocks: core.Set = core.newIdentitySet
+  def children: core.Set = core.newIdentitySet
 
   bb.notNil.ifTrue {
     basicBlocks.add (bb)
@@ -299,12 +299,12 @@ class newSimpleLoopWithBasicBlock (bb: BasicBlock) reducible (isReducible': Bool
 
   method addNode (bb: BasicBlock) -> Done {
     basicBlocks.add (bb)
-    Done
+    done
   }
 
   method addChildLoop (loop: SimpleLoop) -> Done {
     children.add (loop)
-    Done
+    done
   }
 
   method parent -> SimpleLoop { return parent_ }
@@ -318,7 +318,7 @@ class newSimpleLoopWithBasicBlock (bb: BasicBlock) reducible (isReducible': Bool
 
   method setIsRoot -> Done {
     isRoot_ := true
-    Done
+    done
   }
 
   method nestingLevel -> Number { return nestingLevel_ }
@@ -326,26 +326,26 @@ class newSimpleLoopWithBasicBlock (bb: BasicBlock) reducible (isReducible': Bool
   method nestingLevel (level: Number) -> Done {
     nestingLevel_ := level
     (level == 0.asInteger).ifTrue { setIsRoot }
-    Done
+    done
   }
 }
 
 class newUnionFindNode -> UnionFindNode {
-  var parent_: UnionFindNode := Done
-  var bb_: BasicBlock := Done
+  var parent_: UnionFindNode := done
+  var bb_: BasicBlock := done
   var dfsNumber_: Number := 0.asInteger
-  var loop: SimpleLoop := Done
+  var loop: SimpleLoop := done
 
   method initNode (bb: BasicBlock) dfs (dfsNumber: Number) -> Done {
     parent_ := self
     bb_ := bb
     dfsNumber_ := dfsNumber
-    loop := Done
-    Done
+    loop := done
+    done
   }
 
   method findSet -> UnionFindNode {
-    var nodeList: Vector := core.newVector
+    var nodeList: core.Vector := core.newVector
 
     var node: UnionFindNode := self
 
@@ -362,7 +362,7 @@ class newUnionFindNode -> UnionFindNode {
 
   method union(node: UnionFindNode) -> Done {
     parent_ := node
-    Done
+    done
   }
 
   method parent -> UnionFindNode { return parent_ }
@@ -389,7 +389,7 @@ class newLoopTesterApp -> LoopTesterApp {
 
   method buildConnect (start: Number) end (end: Number) -> Done {
     newBasicBlockEdgeFor (cfg) from (start) to (end)
-    Done
+    done
   }
 
   method buildStraight (start: Number) n (n: Number) -> Number {
@@ -442,20 +442,20 @@ class newLoopTesterApp -> LoopTesterApp {
 
       buildConnect (n) end (1.asInteger)
     }
-    Done
+    done
   }
 
   method addDummyLoops (numDummyLoops: Number) -> Done {
     numDummyLoops.timesRepeat {
       findLoops (lsg)
     }
-    Done
+    done
   }
 
   method findLoops (loopStructure: LoopStructureGraph) -> Done {
     var finder: HavlakLoopFinder := newHavlakLoopFinder (cfg) lsg (loopStructure)
     finder.findLoops
-    Done
+    done
   }
 
   method constructSimpleCFG -> Done {
@@ -463,7 +463,7 @@ class newLoopTesterApp -> LoopTesterApp {
     buildBaseLoop (1.asInteger)
     cfg.createNode (2.asInteger)
     newBasicBlockEdgeFor (cfg) from (1.asInteger) to (3.asInteger)
-    Done
+    done
   }
 }
 
@@ -472,15 +472,15 @@ class newHavlakLoopFinder (cfg': ControlFlowGraph) lsg (lsg': LoopStructureGraph
   def lsg: LoopStructureGraph = lsg'
   def unvisited: Number = 2147483647.asInteger
   def maxNonBackPreds: Number = 32.asInteger * 1024.asInteger
-  def nonBackPreds: Vector = core.newVector
-  def backPreds: Vector = core.newVector
-  def number: Dictionary = core.newIdentityDictionary
+  def nonBackPreds: core.Vector = core.newVector
+  def backPreds: core.Vector = core.newVector
+  def number: core.Dictionary = core.newIdentityDictionary
 
   var maxSize: Number := 0.asInteger
-  var header: List := Done
-  var htype: List := Done
-  var last: List := Done
-  var nodes: List := Done
+  var header: List := done
+  var htype: List := done
+  var last: List := done
+  var nodes: List := done
 
   // BasicBlockClass enum #BBTop #BBNonHeader #BBReducible #BBSelf
   //                      #BBIrreducible #BBDead #BBLast
@@ -495,7 +495,7 @@ class newHavlakLoopFinder (cfg': ControlFlowGraph) lsg (lsg': LoopStructureGraph
     number.at (currentNode) put (current)
 
     var lastId: Number := current
-    var outerBlocks: Vector := currentNode.outEdges
+    var outerBlocks: core.Vector := currentNode.outEdges
 
     1.asInteger.to(outerBlocks.size) do { i: Number ->
       var target: BasicBlock := outerBlocks.at(i)
@@ -514,7 +514,7 @@ class newHavlakLoopFinder (cfg': ControlFlowGraph) lsg (lsg': LoopStructureGraph
     }
 
     doDFS (cfg.startBasicBlock) current (1.asInteger)
-    Done
+    done
   }
 
   method identifyEdges (size: Number) -> Done {
@@ -544,7 +544,7 @@ class newHavlakLoopFinder (cfg': ControlFlowGraph) lsg (lsg': LoopStructureGraph
         }
       }
     }
-    Done
+    done
   }
 
   method findLoops -> Done {
@@ -575,13 +575,13 @@ class newHavlakLoopFinder (cfg': ControlFlowGraph) lsg (lsg': LoopStructureGraph
     header.at (1.asInteger) put (1.asInteger)
 
     size.downTo (1.asInteger) do { w: Number ->
-      var nodePool: Vector := core.newVector
+      var nodePool: core.Vector := core.newVector
       var nodeW: BasicBlock := nodes.at(w).bb
 
       nodeW.notNil.ifTrue {
         stepD (w) nodePool (nodePool)
 
-        var workList: Vector := core.newVector
+        var workList: core.Vector := core.newVector
         nodePool.forEach { niter: UnionFindNode -> workList.append(niter) }
 
         (nodePool.size != 0.asInteger).ifTrue {
@@ -602,10 +602,10 @@ class newHavlakLoopFinder (cfg': ControlFlowGraph) lsg (lsg': LoopStructureGraph
         }
       }
     }
-    Done
+    done
   }
 
-  method stepEProcessNonBackPreds (w: Number) nodePool (nodePool: Vector) workList (workList: Vector) x (x: UnionFindNode) -> Done {
+  method stepEProcessNonBackPreds (w: Number) nodePool (nodePool: core.Vector) workList (workList: core.Vector) x (x: UnionFindNode) -> Done {
     nonBackPreds.at(x.dfsNumber).forEach { iter: Number ->
       var y: UnionFindNode := nodes.at(iter)
       var ydash: UnionFindNode := y.findSet
@@ -623,10 +623,10 @@ class newHavlakLoopFinder (cfg': ControlFlowGraph) lsg (lsg': LoopStructureGraph
         }
       }
     }
-    Done
+    done
   }
 
-  method setLoopAttribute (w: Number) nodePool (nodePool: Vector) loop (loop: SimpleLoop) -> Done {
+  method setLoopAttribute (w: Number) nodePool (nodePool: core.Vector) loop (loop: SimpleLoop) -> Done {
     nodes . at (w) . loop := loop
 
     nodePool.forEach { node: UnionFindNode ->
@@ -639,10 +639,10 @@ class newHavlakLoopFinder (cfg': ControlFlowGraph) lsg (lsg': LoopStructureGraph
         loop.addNode(node.bb)
       }
     }
-    Done
+    done
   }
 
-  method stepD (w: Number) nodePool (nodePool: Vector) -> Done {
+  method stepD (w: Number) nodePool (nodePool: core.Vector) -> Done {
     backPreds.at (w). forEach { v: Number ->
       (v != w). ifTrue {
         nodePool.append (nodes.at(v).findSet)
@@ -653,4 +653,4 @@ class newHavlakLoopFinder (cfg': ControlFlowGraph) lsg (lsg': LoopStructureGraph
   }
 }
 
-method newInstance -> Benchmark { newHavlak }
+method newInstance -> harness.Benchmark { newHavlak }

@@ -31,7 +31,7 @@
 import "harness" as harness
 import "Core" as core
 
-def Array: List = platform.kernel.Array
+def Array: Unknown = platform.kernel.Array
 def Exception: Unknown = platform.kernel.Exception
 
 type JsonValue = interface {
@@ -82,7 +82,7 @@ def TRUE: JsonLiteral  = newJsonLiteral("true")
 def FALSE: JsonLiteral = newJsonLiteral("false")
 
 
-class newJson -> Benchmark {
+class newJson -> harness.Benchmark {
   inherit harness.newBenchmark
 
   method benchmark -> JsonObject {
@@ -146,7 +146,7 @@ class newJsonParserWith (string: String) -> JsonParser {
   var index: Number := 0.asInteger
   var line: Number  := 1.asInteger
   var column: Number := 0.asInteger
-  var current: String := Done
+  var current: String := done
   var captureBuffer: String := ""
   var captureStart: Number := -1.asInteger
 
@@ -189,7 +189,7 @@ class newJsonParserWith (string: String) -> JsonParser {
     skipWhiteSpace
     array.add(readValue)
     skipWhiteSpace
-    Done
+    done
   }
 
   method readArray -> JsonArray {
@@ -227,7 +227,7 @@ class newJsonParserWith (string: String) -> JsonParser {
 
     skipWhiteSpace
 
-    Done
+    done
   }
 
   method readObject -> JsonObject {
@@ -284,7 +284,7 @@ class newJsonParserWith (string: String) -> JsonParser {
     (readChar(ch)).ifFalse {
       expected("character: " ++ ch)
     }
-    Done
+    done
   }
 
   method readString -> JsonString {
@@ -328,7 +328,7 @@ class newJsonParserWith (string: String) -> JsonParser {
     read
     captureBuffer := captureBuffer.concatenate(readEscapeChar)
     read
-    Done
+    done
   }
 
   method readNumber -> JsonNumber {
@@ -380,7 +380,7 @@ class newJsonParserWith (string: String) -> JsonParser {
 
   method skipWhiteSpace -> Done {
     { isWhiteSpace }. whileTrue { read }
-    Done
+    done
   }
 
   method read -> Done {
@@ -396,21 +396,21 @@ class newJsonParserWith (string: String) -> JsonParser {
     (index <= input.length).ifTrue {
       current := input.charAt(index)
     } ifFalse {
-      current := Done
+      current := done
     }
 
-    Done
+    done
   }
 
   method startCapture -> Done {
     captureStart := index
-    Done
+    done
   }
 
   method pauseCapture -> Done {
     captureBuffer := captureBuffer.concatenate (input.substringFrom (captureStart) to (index - 1.asInteger))
     captureStart := -1.asInteger
-    Done
+    done
   }
 
   method endCapture -> String {
@@ -431,12 +431,12 @@ class newJsonParserWith (string: String) -> JsonParser {
       error ("Unexpected end of input, expected {expected.asString}")
     }
     error ("Expected {expected} (current is `{current}`)")
-    Done
+    done
   }
 
   method error (message: String) -> Done {
     newParseExceptionWith (message) at (index) line (line) column (column)
-    Done
+    done
   }
 
   method isWhiteSpace -> Boolean {
@@ -486,7 +486,7 @@ class newHashIndexTable -> HashIndexTable {
       hashTable. at (slot) put (0.asInteger)
     }
 
-    Done
+    done
   }
 
   method at (name: String) -> Number {
@@ -510,7 +510,7 @@ class newHashIndexTable -> HashIndexTable {
 method newParseExceptionWith (aMessageString: String) at (offset: Number) line (line: Number) column (column: Number) -> Done {
   print("{aMessageString} [l:{line}, c:{column}, o:{offset}]")
   Exception.new.signal
-  Done
+  done
 }
 
 class newJsonValue -> JsonValue {
@@ -527,24 +527,24 @@ class newJsonValue -> JsonValue {
 
   method asObject -> Done {
     error ("Unsupported operation, not an object: {asString}")
-    Done
+    done
   }
 
   method asArray -> Done {
     error ("Unsupported operation, not an array: {asString}")
-    Done
+    done
   }
 }
 
 class newJsonArray -> JsonArray {
   inherit newJsonValue
   
-  def values: Vector = core.newVector
+  def values: core.Vector = core.newVector
 
   method add (value: JsonValue) -> Done {
     value.ifNil { error("value is null") }
     values.append (value)
-    Done
+    done
   }
 
   method size -> Number { return values.size }
@@ -581,8 +581,8 @@ class newJsonNumber (aString: String) -> JsonNumber {
 class newJsonObject -> JsonObject {
   inherit newJsonValue
  
-  def names: Vector  = core.newVector
-  def values: Vector = core.newVector
+  def names: core.Vector  = core.newVector
+  def values: core.Vector = core.newVector
   def table: HashIndexTable = newHashIndexTable
 
   method add (name: String) with (aJsonValue: JsonValue) -> Done {
@@ -592,14 +592,14 @@ class newJsonObject -> JsonObject {
     table.at (name) put (names.size + 1.asInteger) // + 1 for 1-based indexing
     names.append(name)
     values.append(aJsonValue)
-    Done
+    done
   }
 
   method at (name: String) -> JsonValue {
     name.ifNil { error("name is null") }
     var idx: Number := indexOf(name)
     (idx == 0.asInteger). ifTrue {
-      return Done
+      return done
     } ifFalse {
       return values.at(idx)
     }
@@ -631,4 +631,4 @@ class newJsonString (str: String) -> JsonString {
   method isString -> Boolean { return true }
 }
 
-method newInstance -> Benchmark { newJson }
+method newInstance -> harness.Benchmark { newJson }

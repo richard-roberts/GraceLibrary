@@ -25,7 +25,7 @@
 
 import "harness" as harness
 
-class newSieve -> Benchmark {
+class newSieve -> harness.Benchmark {
   inherit harness.newBenchmark
 
   method benchmark -> Number {
@@ -56,4 +56,4 @@ class newSieve -> Benchmark {
   }
 }
 
-method newInstance -> Benchmark { newSieve }
+method newInstance -> harness.Benchmark { newSieve }

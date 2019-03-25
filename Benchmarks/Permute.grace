@@ -25,11 +25,11 @@
 
 import "harness" as harness
 
-class newPermute -> Benchmark {
+class newPermute -> harness.Benchmark {
   inherit harness.newBenchmark
 
   var count: Number := 0.asInteger
-  var v: List := Done
+  var v: List := done
 
   method benchmark -> Number {
     count := 0.asInteger
@@ -61,4 +61,4 @@ class newPermute -> Benchmark {
   }
 }
 
-method newInstance -> Benchmark { newPermute }
+method newInstance -> harness.Benchmark { newPermute }

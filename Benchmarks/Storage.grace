@@ -20,13 +20,13 @@
 
 import "harness" as harness
 
-class newStorage -> Benchmark {
+class newStorage -> harness.Benchmark {
   inherit harness.newBenchmark
 
   var count: Number := 0.asInteger
 
   method benchmark -> Number {
-    def random: Random = harness.newRandom
+    def random: harness.Random = harness.newRandom
     count := 0.asInteger
     buildTreeDepth(7.asInteger)with(random)
     count
@@ -36,7 +36,7 @@ class newStorage -> Benchmark {
     5461.asInteger == result
   }
 
-  method buildTreeDepth(depth: Number)with(random: Random) -> List {
+  method buildTreeDepth(depth: Number)with(random: harness.Random) -> List {
     count := count + 1.asInteger
     return (depth == 1.asInteger).ifTrue {
       platform.kernel.Array.new((random.next % 10.asInteger) + 1.asInteger)
@@ -47,4 +47,4 @@ class newStorage -> Benchmark {
   }
 }
 
-method newInstance -> Benchmark { newStorage }
+method newInstance -> harness.Benchmark { newStorage }
